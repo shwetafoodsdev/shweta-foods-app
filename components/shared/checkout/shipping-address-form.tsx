@@ -1,0 +1,199 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { City, Country, State } from "country-state-city";
+
+type ShippingAddressFormProps = {
+  initialShipping: Record<string, string>;
+  action: (formData: FormData) => void | Promise<void>;
+};
+
+const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormProps) => {
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const indiaCountry = useMemo(
+    () => countries.find((country) => country.name === "India"),
+    [countries]
+  );
+  const defaultCountry = useMemo(() => {
+    return (
+      countries.find((country) => country.name === initialShipping.country)?.isoCode ??
+      indiaCountry?.isoCode ??
+      "IN"
+    );
+  }, [countries, indiaCountry, initialShipping.country]);
+
+  const [countryCode, setCountryCode] = useState(defaultCountry);
+
+  const states = useMemo(() => State.getStatesOfCountry(countryCode), [countryCode]);
+  const defaultState = useMemo(() => {
+    const fromInitial =
+      states.find((stateItem) => stateItem.name === initialShipping.state)?.isoCode ?? "";
+    const rajasthanCode =
+      states.find((stateItem) => stateItem.name === "Rajasthan")?.isoCode ?? "";
+    return fromInitial || rajasthanCode || states[0]?.isoCode || "";
+  }, [states, initialShipping.state]);
+
+  const [stateCode, setStateCode] = useState(defaultState);
+  const cities = useMemo(() => {
+    if (stateCode) return City.getCitiesOfState(countryCode, stateCode) ?? [];
+    return City.getCitiesOfCountry(countryCode) ?? [];
+  }, [countryCode, stateCode]);
+  const defaultCity = useMemo(() => {
+    const fromInitial = cities.find((city) => city.name === initialShipping.city)?.name ?? "";
+    const bikanerName = cities.find((city) => city.name === "Bikaner")?.name ?? "";
+    return fromInitial || bikanerName || cities[0]?.name || "";
+  }, [cities, initialShipping.city]);
+  const [cityName, setCityName] = useState(defaultCity);
+
+  const selectedCountry = countries.find((country) => country.isoCode === countryCode);
+  const defaultDialCode = selectedCountry?.phonecode
+    ? `+${selectedCountry.phonecode}`
+    : initialShipping.countryCode || "+91";
+  const [dialCode, setDialCode] = useState(defaultDialCode);
+  const dialCodeOptions = useMemo(() => {
+    return countries.map((country) => ({
+      key: `${country.isoCode}-${country.phonecode}`,
+      value: `+${country.phonecode}`,
+      label: `${country.name} (+${country.phonecode})`,
+    }));
+  }, [countries]);
+
+  return (
+    <form action={action} className="mt-6 rounded-xl border p-6 space-y-4">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">First Name *</label>
+          <input className="w-full rounded border px-3 py-2" name="firstName" defaultValue={initialShipping.firstName || ""} required />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Last Name *</label>
+          <input className="w-full rounded border px-3 py-2" name="lastName" defaultValue={initialShipping.lastName || ""} required />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Country *</label>
+          <select
+            className="w-full rounded border px-3 py-2 bg-background"
+            name="country"
+            value={selectedCountry?.name || ""}
+            onChange={(event) => {
+              const selected = countries.find((country) => country.name === event.target.value);
+              if (!selected) return;
+              setCountryCode(selected.isoCode);
+              setDialCode(`+${selected.phonecode}`);
+              const nextStates = State.getStatesOfCountry(selected.isoCode);
+              const nextStateCode = nextStates[0]?.isoCode || "";
+              setStateCode(nextStateCode);
+              const nextCities = (
+                nextStateCode
+                  ? City.getCitiesOfState(selected.isoCode, nextStateCode)
+                  : City.getCitiesOfCountry(selected.isoCode)
+              ) ?? [];
+              setCityName(nextCities[0]?.name || "");
+            }}
+            required
+          >
+            {countries.map((country) => (
+              <option key={country.isoCode} value={country.name}>
+                {country.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">State *</label>
+          <select
+            className="w-full rounded border px-3 py-2 bg-background"
+            name="state"
+            value={states.find((item) => item.isoCode === stateCode)?.name || ""}
+            onChange={(event) => {
+              const selected = states.find((item) => item.name === event.target.value);
+              if (selected) {
+                setStateCode(selected.isoCode);
+                const nextCities = City.getCitiesOfState(countryCode, selected.isoCode) ?? [];
+                setCityName(nextCities[0]?.name || "");
+              }
+            }}
+            required
+          >
+            {states.map((region) => (
+              <option key={region.isoCode} value={region.name}>
+                {region.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">City *</label>
+          <select
+            className="w-full rounded border px-3 py-2 bg-background"
+            name="city"
+            value={cityName}
+            onChange={(event) => setCityName(event.target.value)}
+            required
+          >
+            {cities.map((city) => (
+              <option key={city.name} value={city.name}>
+                {city.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Address Line 1 *</label>
+          <input className="w-full rounded border px-3 py-2" name="address1" defaultValue={initialShipping.address1 || ""} required />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Address Line 2</label>
+          <input className="w-full rounded border px-3 py-2" name="address2" defaultValue={initialShipping.address2 || ""} />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Postal Code *</label>
+          <input
+            className="w-full rounded border px-3 py-2"
+            name="postalCode"
+            defaultValue={initialShipping.postalCode || ""}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-[180px_1fr]">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Country Code *</label>
+          <select
+            className="w-full rounded border px-3 py-2 bg-background"
+            name="countryCode"
+            value={dialCode}
+            onChange={(event) => setDialCode(event.target.value)}
+            required
+          >
+            {dialCodeOptions.map((option) => (
+              <option key={option.key} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Mobile Phone *</label>
+          <input className="w-full rounded border px-3 py-2" name="phone" defaultValue={initialShipping.phone || ""} required />
+        </div>
+      </div>
+
+      <button type="submit" className="rounded bg-slate-900 px-4 py-2 text-white">
+        Continue
+      </button>
+    </form>
+  );
+};
+
+export default ShippingAddressForm;

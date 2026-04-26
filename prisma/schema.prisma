@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  pending
+  paid
+  shipped
+  cancelled
+}
+
+enum PaymentMethod {
+  cod
+  paypal
+  stripe
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique(map: "product_slug_idx")
+  description String
+  price       Int      @db.Integer
+  rating      Decimal  @db.Decimal(3, 2)
+  stock       Int      
+  brand       String
+  images      String[]
+  category    String
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  banner      String?
+  numReviews  Int      @default(0)   
+  isVisiable  Boolean  @default(true)
+  isDealOfDay Boolean  @default(false)
+  dealEndsAt  DateTime? @db.Timestamptz(6)
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+}
+
+model User {
+  id            String    @id @default(uuid())  @db.Uuid
+  name          String    @default("NO_NAME")
+  email         String    @unique(map: "user_email_idx")
+  emailVerified DateTime?  @db.Timestamptz(6)
+  image         String?
+  password      String?
+  role          String    @default("user")
+  address       Json?     @db.Json
+  paymentMethods String?      
+  createdAt     DateTime  @default(now())  @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt
+  accounts       Account[]
+  sessions       Session[]
+  cartItems      CartItem[]
+  orders         Order[]
+  reviews        Review[]
+}
+
+model Account {
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @id
+  userId       String   @db.Uuid
+  expires      DateTime @db.Timestamptz(6)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+
+model CartItem {
+  id        String   @id @default(uuid())
+  userId    String   @db.Uuid
+  productId String
+  qty       Int      @default(1)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id                 String        @id @default(uuid())
+  userId             String        @db.Uuid
+  status             OrderStatus   @default(pending)
+  paymentMethod      PaymentMethod @default(cod)
+  itemsPrice         Int           @default(0)
+  taxPrice           Int           @default(0)
+  shippingPrice      Int           @default(0)
+  totalPrice         Int           @default(0)
+  shippingFullName   String
+  shippingAddress1   String
+  shippingAddress2   String?
+  shippingCity       String
+  shippingPostalCode String
+  shippingCountry    String
+  shippingPhone      String?
+  paidAt             DateTime?     @db.Timestamptz(6)
+  deliveredAt        DateTime?     @db.Timestamptz(6)
+  createdAt          DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime      @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  productId   String
+  qty         Int      @default(1)
+  unitPrice   Int
+  name        String
+  image       String
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String   @db.Uuid
+  title     String?
+  comment   String?
+  rating    Int
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+}
+
+model SiteSettings {
+  id             String   @id
+  shippingCharge Int      @default(0)
+  taxRate        Int      @default(15)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt
+}

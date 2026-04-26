@@ -1,0 +1,98 @@
+import { deleteAdminProduct, getAdminProducts } from "@/lib/actions/admin.actions";
+import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
+import Link from "next/link";
+
+const AdminProductsPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) => {
+  const [{ products, isFallback }, params] = await Promise.all([getAdminProducts(), searchParams]);
+  const q = params.q?.trim().toLowerCase() ?? "";
+  const filteredProducts = q
+    ? products.filter((product) =>
+        [
+          product.id,
+          formatDisplayId("PRD", product.id),
+          product.name,
+          product.slug,
+          product.category,
+          product.brand,
+        ].some((value) => value.toLowerCase().includes(q))
+      )
+    : products;
+
+  async function onDelete(formData: FormData) {
+    "use server";
+    await deleteAdminProduct(formData.get("id")?.toString() || "");
+  }
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="h2-bold">Products</h1>
+        <Link href="/admin/products/new" className="rounded bg-slate-900 px-4 py-2 text-white">
+          Create Product
+        </Link>
+      </div>
+      {isFallback ? (
+        <div className="mb-4 rounded border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          The database is currently unreachable, so this page is showing sample products in read-only mode.
+        </div>
+      ) : null}
+      <div className="rounded border overflow-hidden">
+        <div className="grid grid-cols-[110px_1fr_110px_160px_90px_80px_120px_150px] gap-3 bg-muted/40 p-3 text-xs font-semibold uppercase">
+          <span>ID</span>
+          <span>Name</span>
+          <span>Price</span>
+          <span>Category</span>
+          <span>Stock</span>
+          <span>Rating</span>
+          <span>Deal</span>
+          <span>Actions</span>
+        </div>
+        {filteredProducts.length ? filteredProducts.map((product) => (
+          <div key={product.id} className="grid grid-cols-[110px_1fr_110px_160px_90px_80px_120px_150px] gap-3 border-t p-3 items-center text-sm">
+            <span>{formatDisplayId("PRD", product.id)}</span>
+            <span>{product.name}</span>
+            <span>{formatCurrencyFromCents(product.price)}</span>
+            <span>{product.category}</span>
+            <span>{product.stock}</span>
+            <span>{Number(product.rating)}</span>
+            <span>
+              {product.isDealOfDay && product.dealEndsAt && new Date(product.dealEndsAt) > new Date() ? (
+                <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+                  Deal of the Day
+                </span>
+              ) : (
+                <span className="text-muted-foreground">-</span>
+              )}
+            </span>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/admin/products/${product.id}/edit`}
+                aria-disabled={isFallback}
+                className={`rounded border px-2 py-1 ${isFallback ? "pointer-events-none opacity-50" : ""}`}
+              >
+                Edit
+              </Link>
+              <form action={onDelete}>
+                <input type="hidden" name="id" value={product.id} />
+                <button
+                  type="submit"
+                  disabled={isFallback}
+                  title={isFallback ? "Unavailable while sample fallback data is shown" : "Delete product"}
+                  className="rounded bg-red-600 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-red-300"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        )) : <div className="border-t p-4 text-sm text-muted-foreground">No products match your search.</div>}
+      </div>
+    </div>
+  );
+};
+
+export default AdminProductsPage;
