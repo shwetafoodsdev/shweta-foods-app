@@ -2,6 +2,8 @@ import { getAdminOrders } from "@/lib/actions/order.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
 import Link from "next/link";
 
+type AdminOrder = Awaited<ReturnType<typeof getAdminOrders>>[number];
+
 const AdminOrdersPage = async ({
   searchParams,
 }: {
@@ -10,7 +12,7 @@ const AdminOrdersPage = async ({
   const [orders, params] = await Promise.all([getAdminOrders(), searchParams]);
   const q = params.q?.trim().toLowerCase() ?? "";
   const filteredOrders = q
-    ? orders.filter((order) =>
+    ? orders.filter((order: AdminOrder) =>
         [
           order.id,
           formatDisplayId("ORD", order.id),
@@ -34,7 +36,7 @@ const AdminOrdersPage = async ({
           <span>Status</span>
           <span>Action</span>
         </div>
-        {filteredOrders.length ? filteredOrders.map((order) => (
+        {filteredOrders.length ? filteredOrders.map((order: AdminOrder) => (
           <div key={order.id} className="grid grid-cols-[110px_1fr_140px_120px_140px_100px] gap-3 border-t p-3 text-sm items-center">
             <span>{formatDisplayId("ORD", order.id)}</span>
             <span>{order.user.name || order.user.email}</span>
