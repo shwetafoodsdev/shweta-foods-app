@@ -2,13 +2,16 @@
 
 import { auth } from "@/auth";
 import sampleData from "@/db/sample-data";
+import {
+  deleteCloudinaryAssetByPublicId,
+  getCloudinaryManagedFolder,
+  getCloudinaryPublicIdFromUrl,
+  uploadProductImageToCloudinary,
+} from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { insertProductSchema } from "@/lib/validations";
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
-import path from "node:path";
-import sharp from "sharp";
 
 async function requireAdmin() {
   const session = await auth();
@@ -60,7 +63,16 @@ function getFirstValidationMessage(error: unknown) {
 }
 
 function isManagedProductImage(imagePath: string) {
-  return /^\/images\/[^/]+-\d+\.jpg$/i.test(imagePath);
+  if (/^\/images\/[^/]+-\d+\.jpg$/i.test(imagePath)) {
+    return true;
+  }
+
+  const publicId = getCloudinaryPublicIdFromUrl(imagePath);
+  if (!publicId) {
+    return false;
+  }
+
+  return publicId.startsWith(`${getCloudinaryManagedFolder()}/`);
 }
 
 const supportedImageTypes = new Set([
@@ -76,16 +88,13 @@ const supportedImageTypes = new Set([
 async function removeManagedProductImages(images: string[]) {
   await Promise.all(
     images.filter(isManagedProductImage).map(async (imagePath) => {
-      const filePath = path.join(process.cwd(), "public", imagePath.replace(/^\//, ""));
-      try {
-        await unlink(filePath);
-      } catch (error) {
-        const fileError = error as NodeJS.ErrnoException;
-        if (fileError.code !== "ENOENT") {
-          throw error;
-        }
+      const publicId = getCloudinaryPublicIdFromUrl(imagePath);
+      if (!publicId) {
+        return;
       }
-    })
+
+      await deleteCloudinaryAssetByPublicId(publicId);
+    }),
   );
 }
 
@@ -98,19 +107,18 @@ function getNextManagedImageIndex(images: string[]) {
 }
 
 async function saveUploadedProductImages(slug: string, files: File[], existingImages: string[]) {
-  const imagesDir = path.join(process.cwd(), "public", "images");
-  await mkdir(imagesDir, { recursive: true });
-
   const savedImages: string[] = [];
   const startingIndex = getNextManagedImageIndex(existingImages);
 
   for (const [index, file] of files.entries()) {
     const nextIndex = startingIndex + index + 1;
-    const filePath = path.join(imagesDir, `${slug}-${nextIndex}.jpg`);
     const bytes = Buffer.from(await file.arrayBuffer());
-    const jpegBuffer = await sharp(bytes).jpeg({ quality: 90 }).toBuffer();
-    await writeFile(filePath, jpegBuffer);
-    savedImages.push(`/images/${slug}-${nextIndex}.jpg`);
+    const imageUrl = await uploadProductImageToCloudinary({
+      bytes,
+      slug,
+      index: nextIndex,
+    });
+    savedImages.push(imageUrl);
   }
 
   return savedImages;
@@ -182,7 +190,10 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
 
   const slug = formData.get("slug")?.toString().trim() ?? "";
   const generatedImages = uploadedFiles.length
-    ? uploadedFiles.map((_, index) => `/images/${slug}-${getNextManagedImageIndex(retainedImages) + index + 1}.jpg`)
+    ? uploadedFiles.map(
+        (_, index) =>
+          `https://res.cloudinary.com/placeholder/image/upload/${getCloudinaryManagedFolder()}/${slug}-${getNextManagedImageIndex(retainedImages) + index + 1}.jpg`,
+      )
     : [];
   const candidateImages = [...retainedImages, ...generatedImages];
   const dealEndsAt = isDealOfDay
