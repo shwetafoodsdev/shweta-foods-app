@@ -2,7 +2,9 @@
 
 import { addToCart } from "@/lib/actions/cart.actions";
 import { Button } from "@/components/ui/button";
+import { InlineSpinner } from "@/components/ui/inline-spinner";
 import { useState } from "react";
+import { toast } from "sonner";
 import QuantityStepper from "./quantity-stepper";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -34,29 +36,38 @@ const AddToCartSection = ({
 
   return (
     <Button
-      className="w-full rounded-full"
+      className="w-full gap-2 rounded-full"
       disabled={adding || stock < 1}
+      aria-busy={adding}
       onClick={async () => {
         if (adding) return;
         setAdding(true);
         try {
           const result = await addToCart(productId, 1);
           if (result.success) {
+            toast.success("Added to cart");
             router.refresh();
             return;
           }
-          window.alert(result.message ?? "Unable to add to cart.");
+          toast.error(result.message ?? "Unable to add to cart.");
           if (result.requiresSignIn) {
             router.push("/sign-in");
           }
         } catch {
-          window.alert("Something went wrong. Please try again.");
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setAdding(false);
         }
       }}
     >
-      {adding ? "Adding…" : "+ Add to Cart"}
+      {adding ? (
+        <>
+          <InlineSpinner className="size-4" />
+          Adding…
+        </>
+      ) : (
+        "+ Add to Cart"
+      )}
     </Button>
   );
 };

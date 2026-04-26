@@ -2,8 +2,10 @@
 
 import { addToCart } from "@/lib/actions/cart.actions";
 import { Button } from "@/components/ui/button";
+import { InlineSpinner } from "@/components/ui/inline-spinner";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import QuantityStepper from "./quantity-stepper";
 
 type Props = {
@@ -36,8 +38,9 @@ const ProductCardAddToCart = ({ productId, stock, initialQty }: Props) => {
     <Button
       type="button"
       variant="outline"
-      className="h-9 w-full min-h-9 rounded-lg border-border/50 bg-card px-3 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-muted/50"
+      className="h-9 w-full min-h-9 gap-2 rounded-lg border-border/50 bg-card px-3 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-muted/50"
       disabled={adding}
+      aria-busy={adding}
       onClick={async (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -46,21 +49,29 @@ const ProductCardAddToCart = ({ productId, stock, initialQty }: Props) => {
         try {
           const result = await addToCart(productId, 1);
           if (result.success) {
+            toast.success("Added to cart");
             router.refresh();
             return;
           }
-          window.alert(result.message ?? "Unable to add to cart.");
+          toast.error(result.message ?? "Unable to add to cart.");
           if (result.requiresSignIn) {
             router.push("/sign-in");
           }
         } catch {
-          window.alert("Something went wrong. Please try again.");
+          toast.error("Something went wrong. Please try again.");
         } finally {
           setAdding(false);
         }
       }}
     >
-      {adding ? "Adding…" : "Add to cart"}
+      {adding ? (
+        <>
+          <InlineSpinner className="size-3.5" />
+          Adding…
+        </>
+      ) : (
+        "Add to cart"
+      )}
     </Button>
   );
 };

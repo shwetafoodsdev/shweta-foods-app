@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { signInWithCredentials } from "@/lib/actions/user.actions";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
+import { toast } from "sonner";
 
 const Label = LabelPrimitive.Root;
 
@@ -23,7 +24,7 @@ const CredentialsSigninForm = ({
 
     useEffect(() => {
       if (state && !state.success) {
-        window.alert(state.message);
+        toast.error(state.message);
       }
     }, [state]);
 

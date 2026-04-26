@@ -25,14 +25,24 @@ type DealProduct = {
   dealEndsAt: Date | null;
 };
 
+const timeLabels = [
+  { key: "hours" as const, label: "Hours" },
+  { key: "minutes" as const, label: "Minutes" },
+  { key: "seconds" as const, label: "Seconds" },
+];
+
 const DealOfTheMonth = ({ product }: { product: DealProduct | null }) => {
   const target = useMemo(() => (product?.dealEndsAt ? new Date(product.dealEndsAt) : null), [product?.dealEndsAt]);
-  const [remaining, setRemaining] = useState(() => (target ? getTimeParts(target) : { hours: 0, minutes: 0, seconds: 0 }));
+  /** Countdown uses `Date.now()`; server and client would disagree on first paint — only render after mount. */
+  const [mounted, setMounted] = useState(false);
+  const [remaining, setRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
     if (!target) {
       return;
     }
+    setRemaining(getTimeParts(target));
+    setMounted(true);
     const interval = setInterval(() => {
       setRemaining(getTimeParts(target));
     }, 1000);
@@ -59,14 +69,19 @@ const DealOfTheMonth = ({ product }: { product: DealProduct | null }) => {
           </div>
         </div>
         <div className="grid max-w-sm grid-cols-3 gap-4">
-          {[
-            { label: "Hours", value: remaining.hours },
-            { label: "Minutes", value: remaining.minutes },
-            { label: "Seconds", value: remaining.seconds },
-          ].map((item) => (
-            <div key={item.label} className="text-center">
-              <div className="text-2xl font-bold">{String(item.value).padStart(2, "0")}</div>
-              <div className="text-xs uppercase text-muted-foreground">{item.label}</div>
+          {timeLabels.map(({ key, label }) => (
+            <div key={label} className="text-center">
+              <div className="min-h-9 text-2xl font-bold tabular-nums" aria-live={mounted ? "polite" : undefined}>
+                {mounted ? (
+                  String(remaining[key]).padStart(2, "0")
+                ) : (
+                  <span
+                    className="inline-block h-8 w-10 animate-pulse rounded-md bg-muted"
+                    aria-hidden
+                  />
+                )}
+              </div>
+              <div className="text-xs uppercase text-muted-foreground">{label}</div>
             </div>
           ))}
         </div>

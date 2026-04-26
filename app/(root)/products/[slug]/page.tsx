@@ -11,6 +11,7 @@ import { prisma } from "@/lib/prisma";
 import { canUserReviewProduct, createReview, getReviewsByProductId } from "@/lib/actions/review.actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import PageBreadcrumb from "@/components/shared/page-breadcrumb";
 
 const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
   const { slug } = await props.params;
@@ -36,6 +37,13 @@ const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
 
   return (
     <>
+      <PageBreadcrumb
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Products", href: "/products" },
+          { label: product.name },
+        ]}
+      />
       <section className="flex justify-center">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-start">
           <div className="flex items-center justify-center h-[400px]">

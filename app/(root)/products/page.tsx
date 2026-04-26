@@ -1,6 +1,8 @@
 import { getFilteredProducts, getProductCategories } from "@/lib/actions/product.actions";
 import { getCartQtyByProductIds } from "@/lib/actions/cart.actions";
 import ProductCard from "@/components/shared/product/product-cart";
+import PageBreadcrumb from "@/components/shared/page-breadcrumb";
+import { Button } from "@/components/ui/button";
 import ProductFilterSections from "@/components/shared/product/product-filter-sections";
 import ProductFiltersSheet from "@/components/shared/product/product-filters-sheet";
 import { buildProductListUrl, type ProductListState } from "@/lib/product-list-url";
@@ -32,9 +34,22 @@ const ProductsPage = async ({
 
   const queryFor = (next: Record<string, string | undefined>) => buildProductListUrl(listState, next);
 
+  const hasActiveFilters =
+    q.trim() !== "" ||
+    category !== "all" ||
+    minPrice != null ||
+    maxPrice != null ||
+    minRating != null;
+
   return (
     <div className="mt-8 lg:grid lg:grid-cols-[220px_1fr] lg:items-start lg:gap-6">
       <section className="min-w-0 lg:col-start-2 lg:row-start-1">
+        <PageBreadcrumb
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Products" },
+          ]}
+        />
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <Suspense
@@ -98,15 +113,36 @@ const ProductsPage = async ({
             ))}
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {result.data.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              cartQty={cartQtyByProductId[product.id] ?? 0}
-            />
-          ))}
-        </div>
+        {result.data.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border/60 bg-muted/15 px-6 py-12 text-center">
+            <p className="text-lg font-semibold text-foreground">No products match your search</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {hasActiveFilters
+                ? "Try different filters, clear your current selection, or browse the full catalog."
+                : "Nothing is available here yet. Check back later or go to the home page."}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+              {hasActiveFilters ? (
+                <Button asChild variant="default">
+                  <Link href="/products">View all products</Link>
+                </Button>
+              ) : null}
+              <Button asChild variant="outline">
+                <Link href="/">Back to home</Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {result.data.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                cartQty={cartQtyByProductId[product.id] ?? 0}
+              />
+            ))}
+          </div>
+        )}
       </section>
       <aside className="hidden space-y-6 lg:col-start-1 lg:row-start-1 lg:block">
         <ProductFilterSections categories={categories} listState={listState} />

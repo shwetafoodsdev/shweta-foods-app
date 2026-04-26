@@ -5,6 +5,7 @@ import { APP_NAME, SERVER_URL, APP_DESCRIPTION, DEAL_CREDIT_TEXT } from "@/lib/c
 import { ThemeProvider } from "next-themes";
 import { auth } from "@/auth";
 import { AuthSessionProvider } from "@/components/providers/auth-session-provider";
+import { AppToaster } from "@/components/app-toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -38,6 +39,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <AppToaster />
           </ThemeProvider>
         </AuthSessionProvider>
       </body>
