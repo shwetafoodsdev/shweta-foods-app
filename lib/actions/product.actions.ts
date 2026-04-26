@@ -63,14 +63,14 @@ export async function getProductCategories() {
       by: ["category"],
       _count: true,
     });
-    return categories.map((item) => ({
+    return categories.map((item: { category: string; _count: number }) => ({
       name: item.category,
       count: item._count,
     }));
   } catch (error) {
     if (isDatabaseInitializationError(error)) {
       const counts = new Map<string, number>();
-      for (const product of sampleData.products.filter((item) => item.isVisiable)) {
+      for (const product of sampleData.products.filter((item: { isVisiable: boolean }) => item.isVisiable)) {
         counts.set(product.category, (counts.get(product.category) ?? 0) + 1);
       }
       return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));

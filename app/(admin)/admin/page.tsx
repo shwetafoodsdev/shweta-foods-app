@@ -2,6 +2,8 @@ import { getAdminDashboardStats } from "@/lib/actions/admin.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
 import Link from "next/link";
 
+type AdminDashboardOrder = Awaited<ReturnType<typeof getAdminDashboardStats>>["orders"][number];
+
 const AdminDashboardPage = async ({
   searchParams,
 }: {
@@ -10,7 +12,7 @@ const AdminDashboardPage = async ({
   const [stats, params] = await Promise.all([getAdminDashboardStats(), searchParams]);
   const q = params.q?.trim().toLowerCase() ?? "";
   const orders = q
-    ? stats.orders.filter((order) =>
+    ? stats.orders.filter((order: AdminDashboardOrder) =>
         [
           order.id,
           formatDisplayId("ORD", order.id),
@@ -21,7 +23,7 @@ const AdminDashboardPage = async ({
         ].some((value) => value.toLowerCase().includes(q))
       )
     : stats.orders;
-  const undeliveredOrders = orders.filter((order) => !order.deliveredAt);
+  const undeliveredOrders = orders.filter((order: AdminDashboardOrder) => !order.deliveredAt);
 
   return (
     <div className="space-y-6">
@@ -55,7 +57,7 @@ const AdminDashboardPage = async ({
             <span>Status</span>
             <span>Action</span>
           </div>
-          {undeliveredOrders.length ? undeliveredOrders.map((order) => (
+          {undeliveredOrders.length ? undeliveredOrders.map((order: AdminDashboardOrder) => (
             <div key={order.id} className="grid grid-cols-[110px_1fr_140px_120px_140px_100px] gap-3 border-t p-3 text-sm items-center">
               <span>{formatDisplayId("ORD", order.id)}</span>
               <span>{order.user.name || order.user.email}</span>

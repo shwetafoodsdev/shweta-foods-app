@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import QuantityStepper from "@/components/shared/product/quantity-stepper";
 
+type CartSummaryItem = Awaited<ReturnType<typeof getCartSummary>>["items"][number];
+
 function EmptyCartCard() {
   return (
     <div className="mx-auto mt-4 w-full max-w-2xl rounded-3xl border bg-card px-8 py-10 text-center shadow-sm">
@@ -71,7 +73,7 @@ const CartPage = async () => {
             <div>Price</div>
           </div>
           <div>
-            {summary.items.map((item) => (
+            {summary.items.map((item: CartSummaryItem) => (
               <div key={item.id} className="grid grid-cols-[1fr_auto_auto] gap-3 py-4 border-b last:border-b-0 items-center">
                 <div className="flex items-center gap-3">
                   <Image src={item.product.images[0]} alt={item.product.name} width={48} height={48} className="rounded object-cover" />

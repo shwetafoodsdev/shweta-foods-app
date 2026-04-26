@@ -131,7 +131,7 @@ export async function getAdminDashboardStats() {
     prisma.user.count(),
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 6, include: { user: true } }),
   ]);
-  const revenue = orders.reduce((acc, order) => acc + order.totalPrice, 0);
+  const revenue = orders.reduce((acc: number, order: { totalPrice: number }) => acc + order.totalPrice, 0);
   return { products, users, orders, revenue };
 }
 
@@ -224,7 +224,7 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
     ? await saveUploadedProductImages(parsed.data.slug, uploadedFiles, retainedImages)
     : [];
   const images = [...retainedImages, ...uploadedImages];
-  const removedImages = (existingProduct?.images ?? []).filter((image) => !retainedImages.includes(image));
+  const removedImages = (existingProduct?.images ?? []).filter((image: string) => !retainedImages.includes(image));
 
   if (parsed.data.isDealOfDay) {
     await prisma.product.updateMany({

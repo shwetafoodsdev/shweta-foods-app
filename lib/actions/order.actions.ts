@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateOrderCharges, getSiteSettings } from "@/lib/site-settings";
+import { Prisma } from "@prisma/client";
 
 async function requireUserId() {
   const session = await auth();
@@ -97,11 +98,14 @@ export async function placeOrder() {
     return { success: false, message: "Cart is empty." };
   }
 
-  const itemsPrice = cartItems.reduce((acc, item) => acc + item.qty * item.product.price, 0);
+  const itemsPrice = cartItems.reduce(
+    (acc: number, item: { qty: number; product: { price: number } }) => acc + item.qty * item.product.price,
+    0,
+  );
   const settings = await getSiteSettings();
   const { shippingPrice, taxPrice, totalPrice } = calculateOrderCharges(itemsPrice, settings);
 
-  const order = await prisma.$transaction(async (tx) => {
+  const order = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     for (const item of cartItems) {
       if (item.qty > item.product.stock) {
         throw new Error(`Insufficient stock for ${item.product.name}`);
@@ -126,7 +130,7 @@ export async function placeOrder() {
         shippingCountry: shipping.country ?? "",
         shippingPhone: shipping.phone || null,
         orderItems: {
-          create: cartItems.map((item) => ({
+          create: cartItems.map((item: { productId: string; qty: number; product: { price: number; name: string; images: string[] } }) => ({
             productId: item.productId,
             qty: item.qty,
             unitPrice: item.product.price,

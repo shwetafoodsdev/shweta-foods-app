@@ -45,8 +45,11 @@ export async function getMyCartItems() {
 
 export async function getCartSummary() {
   const items = await getMyCartItems();
-  const totalItems = items.reduce((acc, item) => acc + item.qty, 0);
-  const subtotal = items.reduce((acc, item) => acc + item.qty * item.product.price, 0);
+  const totalItems = items.reduce((acc: number, item: { qty: number }) => acc + item.qty, 0);
+  const subtotal = items.reduce(
+    (acc: number, item: { qty: number; product: { price: number } }) => acc + item.qty * item.product.price,
+    0,
+  );
   return { items, totalItems, subtotal };
 }
 
@@ -70,7 +73,7 @@ export async function getCartQtyByProductIds(productIds: string[]): Promise<Reco
     where: { userId: session.user.id, productId: { in: productIds } },
     select: { productId: true, qty: true },
   });
-  return Object.fromEntries(rows.map((r) => [r.productId, r.qty]));
+  return Object.fromEntries(rows.map((r: { productId: string; qty: number }) => [r.productId, r.qty]));
 }
 
 export async function addToCart(productId: string, qty = 1) {

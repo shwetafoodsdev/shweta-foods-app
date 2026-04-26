@@ -1,5 +1,6 @@
 import { getOrderById } from "@/lib/actions/order.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
+import type { OrderItem } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { markOrderDelivered } from "@/lib/actions/order.actions";
 import { auth } from "@/auth";
@@ -70,7 +71,7 @@ const OrderDetailsPage = async ({
         <div className="rounded border p-4">
           <h2 className="font-semibold mb-3">Order Items</h2>
           <div className="space-y-2">
-            {order.orderItems.map((item) => (
+            {order.orderItems.map((item: OrderItem) => (
               <div key={item.id} className="grid grid-cols-[1fr_auto_auto] gap-3">
                 <p>{item.name}</p>
                 <p>{item.qty}</p>

@@ -2,6 +2,8 @@ import { getMyOrders } from "@/lib/actions/order.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
 import Link from "next/link";
 
+type MyOrder = Awaited<ReturnType<typeof getMyOrders>>[number];
+
 const AccountOrdersPage = async () => {
   const orders = await getMyOrders();
 
@@ -38,7 +40,7 @@ const AccountOrdersPage = async () => {
           <span>Total</span>
           <span>Action</span>
         </div>
-        {orders.map((order) => (
+        {orders.map((order: MyOrder) => (
           <div key={order.id} className="grid grid-cols-4 gap-3 p-3 border-b last:border-b-0">
             <span>{formatDisplayId("ORD", order.id)}</span>
             <span>{order.createdAt.toLocaleDateString()}</span>

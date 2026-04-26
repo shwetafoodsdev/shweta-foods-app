@@ -5,6 +5,8 @@ import { calculateOrderCharges, getSiteSettings } from "@/lib/site-settings";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
+type CartSummaryItem = Awaited<ReturnType<typeof getCartSummary>>["items"][number];
+
 const PlaceOrderPage = async () => {
   const [summary, checkoutState, siteSettings] = await Promise.all([getCartSummary(), getCheckoutState(), getSiteSettings()]);
   const shipping = (checkoutState?.address || {}) as Record<string, string>;
@@ -35,7 +37,7 @@ const PlaceOrderPage = async () => {
         <div className="rounded border p-4">
           <h2 className="font-semibold mb-4">Order Items</h2>
           <div className="space-y-3">
-            {summary.items.map((item) => (
+            {summary.items.map((item: CartSummaryItem) => (
               <div key={item.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-3">
                 <div className="flex items-center gap-3">
                   <Image src={item.product.images[0]} alt={item.product.name} width={42} height={42} className="rounded" />

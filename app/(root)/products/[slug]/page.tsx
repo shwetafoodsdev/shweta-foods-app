@@ -13,6 +13,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import PageBreadcrumb from "@/components/shared/page-breadcrumb";
 
+type ProductReview = Awaited<ReturnType<typeof getReviewsByProductId>>[number];
+
 const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
   const { slug } = await props.params;
   const product = await getProductBySlug(slug);
@@ -106,7 +108,7 @@ const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
         <h2 className="h2-bold mb-4">Customer Reviews</h2>
         {reviews.length ? (
           <div className="space-y-4">
-            {reviews.map((review) => (
+            {reviews.map((review: ProductReview) => (
               <article key={review.id} className="rounded-lg border p-4">
                 <div className="flex items-center justify-between">
                   <div className="font-semibold">{review.user.name || "Customer"}</div>

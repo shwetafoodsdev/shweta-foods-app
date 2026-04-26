@@ -9,6 +9,8 @@ import { buildProductListUrl, type ProductListState } from "@/lib/product-list-u
 import Link from "next/link";
 import { Suspense } from "react";
 
+type FilteredProduct = Awaited<ReturnType<typeof getFilteredProducts>>["data"][number];
+
 const ProductsPage = async ({
   searchParams,
 }: {
@@ -30,7 +32,7 @@ const ProductsPage = async ({
 
   const listState: ProductListState = { q, category, sort, minPrice, maxPrice, minRating, page };
 
-  const cartQtyByProductId = await getCartQtyByProductIds(result.data.map((p) => p.id));
+  const cartQtyByProductId = await getCartQtyByProductIds(result.data.map((p: FilteredProduct) => p.id));
 
   const queryFor = (next: Record<string, string | undefined>) => buildProductListUrl(listState, next);
 
@@ -134,7 +136,7 @@ const ProductsPage = async ({
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {result.data.map((product) => (
+            {result.data.map((product: FilteredProduct) => (
               <ProductCard
                 key={product.id}
                 product={product}

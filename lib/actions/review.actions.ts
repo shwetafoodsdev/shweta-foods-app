@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -67,7 +68,7 @@ export async function createReview(formData: FormData) {
   }
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.review.upsert({
         where: { productId_userId: { productId, userId: session.user.id } },
         update: { rating, title, comment },

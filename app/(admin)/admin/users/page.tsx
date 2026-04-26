@@ -2,6 +2,8 @@ import { deleteUser, getAdminUsers, updateUserRole } from "@/lib/actions/admin.a
 import { auth } from "@/auth";
 import { formatDisplayId } from "@/lib/format";
 
+type AdminUser = Awaited<ReturnType<typeof getAdminUsers>>[number];
+
 const AdminUsersPage = async ({
   searchParams,
 }: {
@@ -10,7 +12,7 @@ const AdminUsersPage = async ({
   const [users, session, params] = await Promise.all([getAdminUsers(), auth(), searchParams]);
   const q = params.q?.trim().toLowerCase() ?? "";
   const filteredUsers = q
-    ? users.filter((user) =>
+    ? users.filter((user: AdminUser) =>
         [
           user.id,
           formatDisplayId("USR", user.id),
@@ -44,7 +46,7 @@ const AdminUsersPage = async ({
           <span>Role</span>
           <span>Actions</span>
         </div>
-        {filteredUsers.length ? filteredUsers.map((user) => (
+        {filteredUsers.length ? filteredUsers.map((user: AdminUser) => (
           <div key={user.id} className="grid grid-cols-[110px_1fr_1fr_120px_190px] gap-3 border-t p-3 items-center text-sm">
             <span>{formatDisplayId("USR", user.id)}</span>
             <span>{user.name}</span>

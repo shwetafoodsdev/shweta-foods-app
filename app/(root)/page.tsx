@@ -5,11 +5,13 @@ import Link from "next/link";
 import DealOfTheMonth from "@/components/shared/home/deal-of-the-month";
 import HomeFeatureStrip from "@/components/shared/home/home-feature-strip";
 
+type LatestProduct = Awaited<ReturnType<typeof getLatestProducts>>[number];
+
 const Homepage = async () => {
   const products = await getLatestProducts();
   const [dealProduct, cartQtyByProductId] = await Promise.all([
     getDealProduct(),
-    getCartQtyByProductIds(products.map((p) => p.id)),
+    getCartQtyByProductIds(products.map((p: LatestProduct) => p.id)),
   ]);
   const dealProductData = dealProduct
     ? {

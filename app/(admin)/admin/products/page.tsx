@@ -2,6 +2,8 @@ import { deleteAdminProduct, getAdminProducts } from "@/lib/actions/admin.action
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
 import Link from "next/link";
 
+type AdminProduct = Awaited<ReturnType<typeof getAdminProducts>>["products"][number];
+
 const AdminProductsPage = async ({
   searchParams,
 }: {
@@ -10,7 +12,7 @@ const AdminProductsPage = async ({
   const [{ products, isFallback }, params] = await Promise.all([getAdminProducts(), searchParams]);
   const q = params.q?.trim().toLowerCase() ?? "";
   const filteredProducts = q
-    ? products.filter((product) =>
+    ? products.filter((product: AdminProduct) =>
         [
           product.id,
           formatDisplayId("PRD", product.id),
@@ -51,7 +53,7 @@ const AdminProductsPage = async ({
           <span>Deal</span>
           <span>Actions</span>
         </div>
-        {filteredProducts.length ? filteredProducts.map((product) => (
+        {filteredProducts.length ? filteredProducts.map((product: AdminProduct) => (
           <div key={product.id} className="grid grid-cols-[110px_1fr_110px_160px_90px_80px_120px_150px] gap-3 border-t p-3 items-center text-sm">
             <span>{formatDisplayId("PRD", product.id)}</span>
             <span>{product.name}</span>
