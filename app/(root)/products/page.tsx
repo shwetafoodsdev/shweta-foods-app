@@ -1,17 +1,11 @@
 import { getFilteredProducts, getProductCategories } from "@/lib/actions/product.actions";
+import { getCartQtyByProductIds } from "@/lib/actions/cart.actions";
 import ProductCard from "@/components/shared/product/product-cart";
+import ProductFilterSections from "@/components/shared/product/product-filter-sections";
+import ProductFiltersSheet from "@/components/shared/product/product-filters-sheet";
+import { buildProductListUrl, type ProductListState } from "@/lib/product-list-url";
 import Link from "next/link";
-
-const PRICE_FILTERS = [
-  { label: "Any", min: undefined, max: undefined },
-  { label: "₹1 to ₹5,000", min: 1, max: 5000 },
-  { label: "₹5,001 to ₹10,000", min: 5001, max: 10000 },
-  { label: "₹10,001 to ₹20,000", min: 10001, max: 20000 },
-  { label: "₹20,001 to ₹50,000", min: 20001, max: 50000 },
-  { label: "₹50,001 to ₹1,00,000", min: 50001, max: 100000 },
-];
-
-const RATING_FILTERS = [0, 4, 3, 2, 1];
+import { Suspense } from "react";
 
 const ProductsPage = async ({
   searchParams,
@@ -32,87 +26,70 @@ const ProductsPage = async ({
     getFilteredProducts({ q, category, sort, minPrice, maxPrice, minRating, page }),
   ]);
 
-  const queryFor = (next: Record<string, string | undefined>) => {
-    const query = new URLSearchParams();
-    const merged = {
-      q: q || undefined,
-      category: category !== "all" ? category : undefined,
-      sort: sort !== "newest" ? sort : undefined,
-      minPrice: minPrice?.toString(),
-      maxPrice: maxPrice?.toString(),
-      minRating: minRating?.toString(),
-      page: page > 1 ? page.toString() : undefined,
-      ...next,
-    };
+  const listState: ProductListState = { q, category, sort, minPrice, maxPrice, minRating, page };
 
-    Object.entries(merged).forEach(([key, value]) => {
-      if (value) query.set(key, value);
-    });
-    return `/products${query.toString() ? `?${query.toString()}` : ""}`;
-  };
+  const cartQtyByProductId = await getCartQtyByProductIds(result.data.map((p) => p.id));
+
+  const queryFor = (next: Record<string, string | undefined>) => buildProductListUrl(listState, next);
 
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-[220px_1fr]">
-      <aside className="space-y-6">
-        <div>
-          <h3 className="font-bold text-xl mb-2">Department</h3>
-          <div className="space-y-1">
-            <Link className="block font-semibold" href={queryFor({ category: undefined, page: undefined })}>
-              Any
-            </Link>
-            {categories.map((item) => (
-              <Link
-                key={item.name}
-                className="block hover:underline"
-                href={queryFor({ category: item.name, page: undefined })}
-              >
-                {item.name}
+    <div className="mt-8 lg:grid lg:grid-cols-[220px_1fr] lg:items-start lg:gap-6">
+      <section className="min-w-0 lg:col-start-2 lg:row-start-1">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            <Suspense
+              fallback={
+                <div
+                  className="h-8 w-[5.5rem] shrink-0 rounded-md border border-dashed border-transparent bg-muted/40 lg:hidden"
+                  aria-hidden
+                />
+              }
+            >
+              <ProductFiltersSheet>
+                <ProductFilterSections categories={categories} listState={listState} />
+              </ProductFiltersSheet>
+            </Suspense>
+            <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+              <span>
+                Category: {category === "all" ? "Any" : category}
+              </span>
+              {minPrice != null &&
+                maxPrice != null &&
+                !Number.isNaN(minPrice) &&
+                !Number.isNaN(maxPrice) && (
+                  <>
+                    <span className="text-muted-foreground/80" aria-hidden>
+                      ·
+                    </span>
+                    <span className="text-foreground">
+                      Price: ₹{minPrice.toLocaleString("en-IN")} – ₹{maxPrice.toLocaleString("en-IN")}
+                    </span>
+                  </>
+                )}
+              {minRating != null && !Number.isNaN(minRating) && (
+                <>
+                  <span className="text-muted-foreground/80" aria-hidden>
+                    ·
+                  </span>
+                  <span className="text-foreground">Rating: {minRating}★ and up</span>
+                </>
+              )}
+              {q.trim() ? (
+                <>
+                  <span className="text-muted-foreground/80" aria-hidden>
+                    ·
+                  </span>
+                  <span className="min-w-0 max-w-[12rem] truncate text-foreground sm:max-w-none" title={q.trim()}>
+                    &ldquo;{q.trim()}&rdquo;
+                  </span>
+                </>
+              ) : null}
+              <Link className="ml-0.5 shrink-0 font-medium text-foreground underline" href="/products">
+                Clear
               </Link>
-            ))}
+            </span>
           </div>
-        </div>
-        <div>
-          <h3 className="font-bold text-xl mb-2">Price</h3>
-          <div className="space-y-1">
-            {PRICE_FILTERS.map((item) => (
-              <Link
-                key={item.label}
-                className="block hover:underline"
-                href={queryFor({
-                  minPrice: item.min?.toString(),
-                  maxPrice: item.max?.toString(),
-                  page: undefined,
-                })}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-        <div>
-          <h3 className="font-bold text-xl mb-2">Customer Ratings</h3>
-          <div className="space-y-1">
-            {RATING_FILTERS.map((item) => (
-              <Link
-                key={item}
-                className="block hover:underline"
-                href={queryFor({ minRating: item ? String(item) : undefined, page: undefined })}
-              >
-                {item ? `${item} stars & up` : "Any"}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </aside>
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Category: {category === "all" ? "Any" : category}{" "}
-            <Link className="ml-2 underline" href="/products">
-              Clear
-            </Link>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted-foreground">Sort By:</span>
             {["newest", "lowest", "highest", "rating"].map((option) => (
               <Link key={option} className={sort === option ? "font-semibold" : ""} href={queryFor({ sort: option })}>
@@ -123,10 +100,17 @@ const ProductsPage = async ({
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {result.data.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              cartQty={cartQtyByProductId[product.id] ?? 0}
+            />
           ))}
         </div>
       </section>
+      <aside className="hidden space-y-6 lg:col-start-1 lg:row-start-1 lg:block">
+        <ProductFilterSections categories={categories} listState={listState} />
+      </aside>
     </div>
   );
 };

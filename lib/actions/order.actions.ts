@@ -149,6 +149,7 @@ export async function placeOrder() {
   });
 
   revalidatePath("/cart");
+  revalidatePath("/", "layout");
   return { success: true, orderId: order.id };
 }
 

@@ -12,13 +12,36 @@ import { Button } from "@/components/ui/button";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { User } from "lucide-react";
+import { ThemeMenuItems } from "./theme-menu-items";
 
 const UserMenu = ({ session }: { session: Session | null }) => {
   if (!session?.user) {
     return (
-      <Button asChild>
-        <Link href="/sign-in">Sign In</Link>
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            className="shrink-0 gap-2 px-2 sm:px-3"
+            aria-label="Account: appearance and sign in"
+          >
+            <User className="size-5 shrink-0" />
+            <span className="hidden sm:inline">Account</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          sideOffset={8}
+          className="z-[100] !w-56 min-w-56 border bg-white shadow-lg dark:bg-gray-900"
+        >
+          <DropdownMenuItem asChild>
+            <Link href="/sign-in">Sign in</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <ThemeMenuItems />
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
@@ -28,6 +51,7 @@ const UserMenu = ({ session }: { session: Session | null }) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
+          type="button"
           className="size-9 rounded-full border border-border bg-muted/80 text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label="Open profile menu"
         >
@@ -37,7 +61,7 @@ const UserMenu = ({ session }: { session: Session | null }) => {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        className="z-[100] !w-56 min-w-56 bg-white dark:bg-gray-900 border shadow-lg"
+        className="z-[100] !w-56 min-w-56 border bg-white shadow-lg dark:bg-gray-900"
       >
         <DropdownMenuLabel className="text-sm">
           <div className="font-semibold">{session.user.name || "User"}</div>
@@ -56,7 +80,9 @@ const UserMenu = ({ session }: { session: Session | null }) => {
           <Link href="/account/orders">Order History</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Sign Out</DropdownMenuItem>
+        <ThemeMenuItems />
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/" })}>Sign out</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

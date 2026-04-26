@@ -24,9 +24,12 @@ const SearchBar = ({ categories }: { categories: CategoryOption[] }) => {
   };
 
   return (
-    <form onSubmit={onSubmit} className="hidden lg:flex items-center gap-0 rounded-md border overflow-hidden w-full max-w-xl">
+    <form
+      onSubmit={onSubmit}
+      className="flex w-full min-w-0 max-w-full flex-1 items-center gap-0 overflow-hidden rounded-md border sm:max-w-xl"
+    >
       <select
-        className="h-10 border-r bg-background px-3 text-sm outline-none"
+        className="hidden h-9 shrink-0 border-r bg-background px-2 text-xs outline-none sm:block sm:h-10 sm:px-3 sm:text-sm"
         value={category}
         onChange={(event) => setCategory(event.target.value)}
       >
@@ -40,10 +43,14 @@ const SearchBar = ({ categories }: { categories: CategoryOption[] }) => {
       <input
         value={q}
         onChange={(event) => setQ(event.target.value)}
-        className="h-10 flex-1 px-3 outline-none bg-background"
+        className="h-9 min-w-0 flex-1 bg-background px-2 text-sm outline-none sm:h-10 sm:px-3"
         placeholder="Search..."
       />
-      <button type="submit" className="h-10 w-11 bg-slate-900 text-white flex items-center justify-center">
+      <button
+        type="submit"
+        className="flex h-9 w-9 shrink-0 items-center justify-center bg-slate-900 text-white sm:h-10 sm:w-11"
+        aria-label="Search"
+      >
         <Search className="size-4" />
       </button>
     </form>

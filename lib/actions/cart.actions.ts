@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
+function revalidateCartAndHeader() {
+  revalidatePath("/cart");
+  revalidatePath("/", "layout");
+}
+
 async function requireUserId() {
   const session = await auth();
   if (!session?.user?.id) {
@@ -36,6 +41,29 @@ export async function getCartSummary() {
   return { items, totalItems, subtotal };
 }
 
+/** Total number of product units in the signed-in user’s cart; 0 if not signed in. */
+export async function getCartItemCount(): Promise<number> {
+  const session = await auth();
+  if (!session?.user?.id) return 0;
+  const result = await prisma.cartItem.aggregate({
+    where: { userId: session.user.id },
+    _sum: { qty: true },
+  });
+  return result._sum.qty ?? 0;
+}
+
+/** For listing pages: per-product line quantities for the current user. */
+export async function getCartQtyByProductIds(productIds: string[]): Promise<Record<string, number>> {
+  if (productIds.length === 0) return {};
+  const session = await auth();
+  if (!session?.user?.id) return {};
+  const rows = await prisma.cartItem.findMany({
+    where: { userId: session.user.id, productId: { in: productIds } },
+    select: { productId: true, qty: true },
+  });
+  return Object.fromEntries(rows.map((r) => [r.productId, r.qty]));
+}
+
 export async function addToCart(productId: string, qty = 1) {
   try {
     const userId = await requireUserId();
@@ -59,7 +87,7 @@ export async function addToCart(productId: string, qty = 1) {
         data: { userId, productId, qty: Math.max(1, Math.min(qty, product.stock)) },
       });
     }
-    revalidatePath("/cart");
+    revalidateCartAndHeader();
     revalidatePath(`/products/${product.slug}`);
     return { success: true };
   } catch (error) {
@@ -84,7 +112,7 @@ export async function updateCartItemQty(productId: string, qty: number) {
       await prisma.cartItem.delete({
         where: { userId_productId: { userId, productId } },
       });
-      revalidatePath("/cart");
+      revalidateCartAndHeader();
       revalidatePath(`/products/${existing.product.slug}`);
       return { success: true };
     }
@@ -94,7 +122,7 @@ export async function updateCartItemQty(productId: string, qty: number) {
       where: { userId_productId: { userId, productId } },
       data: { qty: nextQty },
     });
-    revalidatePath("/cart");
+    revalidateCartAndHeader();
     revalidatePath(`/products/${existing.product.slug}`);
     return { success: true };
   } catch (error) {
@@ -110,7 +138,7 @@ export async function removeFromCart(productId: string) {
     await prisma.cartItem.delete({
       where: { userId_productId: { userId, productId } },
     });
-    revalidatePath("/cart");
+    revalidateCartAndHeader();
     return { success: true };
   } catch (error) {
     const message =

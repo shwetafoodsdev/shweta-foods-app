@@ -2,7 +2,6 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import ModeToggle from "@/components/shared/header/mode-toggle";
 import UserMenu from "@/components/shared/header/user-menu";
 import AdminSearchBar from "@/components/shared/header/admin-search-bar";
 import { APP_NAME } from "@/lib/constants";
@@ -54,7 +53,6 @@ export default async function AdminLayout({
             >
               <AdminSearchBar />
             </Suspense>
-            <ModeToggle />
             <UserMenu session={session} />
           </div>
         </div>

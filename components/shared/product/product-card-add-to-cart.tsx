@@ -2,41 +2,45 @@
 
 import { addToCart } from "@/lib/actions/cart.actions";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import QuantityStepper from "./quantity-stepper";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-const AddToCartSection = ({
-  productId,
-  stock,
-  currentQty,
-}: {
+type Props = {
   productId: string;
   stock: number;
-  currentQty: number;
-}) => {
+  initialQty: number;
+};
+
+const ProductCardAddToCart = ({ productId, stock, initialQty }: Props) => {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
 
-  if (currentQty > 0) {
+  if (stock < 1) {
     return (
-      <div className="space-y-3">
-        <div className="flex justify-end">
-          <QuantityStepper productId={productId} qty={currentQty} max={stock} />
-        </div>
-        <Button asChild className="w-full rounded-full">
-          <Link href="/cart">Go to Cart</Link>
-        </Button>
+      <p className="text-center text-xs text-muted-foreground" aria-live="polite">
+        Out of stock
+      </p>
+    );
+  }
+
+  if (initialQty > 0) {
+    return (
+      <div className="flex w-full justify-center py-0.5">
+        <QuantityStepper compact productId={productId} qty={initialQty} max={stock} />
       </div>
     );
   }
 
   return (
     <Button
-      className="w-full rounded-full"
-      disabled={adding || stock < 1}
-      onClick={async () => {
+      type="button"
+      variant="outline"
+      className="h-9 w-full min-h-9 rounded-lg border-border/50 bg-card px-3 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-muted/50"
+      disabled={adding}
+      onClick={async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (adding) return;
         setAdding(true);
         try {
@@ -56,9 +60,9 @@ const AddToCartSection = ({
         }
       }}
     >
-      {adding ? "Adding…" : "+ Add to Cart"}
+      {adding ? "Adding…" : "Add to cart"}
     </Button>
   );
 };
 
-export default AddToCartSection;
+export default ProductCardAddToCart;

@@ -5,10 +5,13 @@ const ProductList = ({
   data,
   title,
   limit,
+  cartQtyByProductId = {},
 }: {
   data: Product[];
   title?: string;
   limit?: number;
+  /** Signed-in line quantities for cart, keyed by product id. */
+  cartQtyByProductId?: Record<string, number>;
 }) => {
   const limitedData = limit ? data.slice(0, limit) : data;
 
@@ -18,7 +21,11 @@ const ProductList = ({
       {limitedData.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center sm:justify-items-stretch">
           {limitedData.map((product: Product) => (
-            <ProductCard key={product.slug} product={product} />
+            <ProductCard
+              key={product.slug}
+              product={product}
+              cartQty={cartQtyByProductId[product.id] ?? 0}
+            />
           ))}
         </div>
       ) : (

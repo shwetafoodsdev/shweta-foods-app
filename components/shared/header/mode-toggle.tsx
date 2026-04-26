@@ -2,19 +2,17 @@
 
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { SunIcon, MoonIcon, SunMoonIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ThemeMenuItems } from "./theme-menu-items";
 
 const ModeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -24,7 +22,11 @@ const ModeToggle = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 p-0 bg-transparent border-none shadow-none outline-none cursor-pointer">
+        <button
+          type="button"
+          className="flex size-9 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent p-0 shadow-none outline-none hover:bg-muted"
+          aria-label="Theme and appearance"
+        >
           {!mounted || theme === "system" ? (
             <SunMoonIcon className="h-5 w-5" />
           ) : theme === "light" ? (
@@ -32,7 +34,6 @@ const ModeToggle = () => {
           ) : (
             <MoonIcon className="h-5 w-5" />
           )}
-          <span className="md:hidden">Theme</span>
         </button>
       </DropdownMenuTrigger>
 
@@ -42,31 +43,9 @@ const ModeToggle = () => {
           align="start"
           sideOffset={8}
           collisionPadding={16}
-          className="z-50 w-40 bg-white dark:bg-gray-900 border shadow-lg"
+          className="z-50 min-w-52 p-0.5 border bg-white shadow-lg dark:bg-gray-900"
         >
-          <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-
-          <DropdownMenuCheckboxItem
-            checked={theme === "light"}
-            onClick={() => setTheme("light")}
-          >
-            Light
-          </DropdownMenuCheckboxItem>
-
-          <DropdownMenuCheckboxItem
-            checked={theme === "dark"}
-            onClick={() => setTheme("dark")}
-          >
-            Dark
-          </DropdownMenuCheckboxItem>
-
-          <DropdownMenuCheckboxItem
-            checked={theme === "system"}
-            onClick={() => setTheme("system")}
-          >
-            System
-          </DropdownMenuCheckboxItem>
+          <ThemeMenuItems defaultOpen />
         </DropdownMenuContent>
       </DropdownMenuPortal>
     </DropdownMenu>
