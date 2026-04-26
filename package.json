@@ -13,6 +13,7 @@
     "@auth/prisma-adapter": "^2.11.2",
     "@prisma/client": "^5.22.0",
     "@prisma/config": "^7.7.0",
+    "@prisma/extension-accelerate": "^3.0.1",
     "@shadcn/ui": "^0.0.4",
     "animate.css": "^4.1.1",
     "bcrypt-ts-edge": "^3.0.1",

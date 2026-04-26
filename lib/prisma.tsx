@@ -1,15 +1,26 @@
 import { PrismaClient } from "@prisma/client";
+import { withAccelerate } from "@prisma/extension-accelerate";
 
-const globalForPrisma = global as unknown as {
-  prisma: PrismaClient;
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<typeof createPrismaClient> | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-     log: ["error"],// optional
-  });
+function createPrismaClient() {
+  const url = process.env.DATABASE_URL;
+  const useAccelerate =
+    url?.startsWith("prisma+postgres://") || url?.startsWith("prisma://");
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  if (useAccelerate) {
+    return new PrismaClient({ log: ["error"] }).$extends(withAccelerate());
+  }
+
+  return new PrismaClient({
+    log: ["error"],
+  });
 }
+
+if (!globalForPrisma.prisma) {
+  globalForPrisma.prisma = createPrismaClient();
+}
+
+export const prisma = globalForPrisma.prisma;
