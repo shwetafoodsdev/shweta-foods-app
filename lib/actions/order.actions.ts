@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateOrderCharges, getSiteSettings } from "@/lib/site-settings";
 import { Prisma } from "@prisma/client";
+import { shippingAddressSchema } from "@/lib/validations";
 
 async function requireUserId() {
   const session = await auth();
@@ -14,39 +15,52 @@ async function requireUserId() {
 
 export async function saveShippingAddress(formData: FormData) {
   const userId = await requireUserId();
-  const firstName = formData.get("firstName")?.toString().trim() ?? "";
-  const lastName = formData.get("lastName")?.toString().trim() ?? "";
-  const phoneNumber = formData.get("phone")?.toString().trim() ?? "";
-  const countryCode = formData.get("countryCode")?.toString().trim() ?? "";
-  const address1 = formData.get("address1")?.toString().trim() ?? "";
-  const city = formData.get("city")?.toString().trim() ?? "";
-  const state = formData.get("state")?.toString().trim() ?? "";
-  const postalCode = formData.get("postalCode")?.toString().trim() ?? "";
-  const country = formData.get("country")?.toString().trim() ?? "";
+  const parsed = shippingAddressSchema.safeParse({
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    address1: formData.get("address1"),
+    address2: formData.get("address2"),
+    city: formData.get("city"),
+    state: formData.get("state"),
+    postalCode: formData.get("postalCode"),
+    country: formData.get("country"),
+    countryCode: formData.get("countryCode"),
+    phone: formData.get("phone"),
+  });
 
-  if (!firstName || !lastName) {
-    return { success: false, message: "First and last name are required." };
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: parsed.error.issues[0]?.message ?? "Invalid shipping details.",
+    };
   }
-  if (!phoneNumber || !countryCode) {
-    return { success: false, message: "Phone number with country code is required." };
-  }
-  if (!address1 || !city || !state || !postalCode || !country) {
-    return { success: false, message: "Please complete all required address fields." };
-  }
+
+  const {
+    firstName,
+    lastName,
+    address1,
+    address2,
+    city,
+    state,
+    postalCode,
+    country,
+    countryCode,
+    phone,
+  } = parsed.data;
 
   const shipping = {
     firstName,
     lastName,
     fullName: `${firstName} ${lastName}`.trim(),
     address1,
-    address2: formData.get("address2")?.toString() ?? "",
+    address2: address2 ?? "",
     city,
     state,
     postalCode,
     country,
     countryCode,
-    phone: phoneNumber,
-    phoneWithCode: `${countryCode} ${phoneNumber}`.trim(),
+    phone,
+    phoneWithCode: `${countryCode} ${phone}`.trim(),
   };
 
   await prisma.user.update({

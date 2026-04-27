@@ -13,11 +13,13 @@ const shwetaFoodsData = {
       email: "admin@example.com",
       password: hashSync("password123", 10),
       role: "admin",
+      emailVerified: new Date(),
     },
     {
       name: "Sample Customer",
       email: "user@example.com",
       password: hashSync("password123", 10),
+      emailVerified: new Date(),
     },
   ],
 

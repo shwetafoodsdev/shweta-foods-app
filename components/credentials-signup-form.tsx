@@ -7,11 +7,18 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { signUpUser } from "@/lib/actions/user.actions";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 const Label = LabelPrimitive.Root;
 
 const CredentialsSignupForm = () => {
   const [state, formAction, isPending] = useActionState(signUpUser, null);
+
+  useEffect(() => {
+    if (state?.success) toast.success(state.message);
+    if (state && !state.success) toast.error(state.message);
+  }, [state]);
 
   return (
     <form action={formAction} className="w-full">
@@ -39,7 +46,14 @@ const CredentialsSignupForm = () => {
             Create Account
           </Button>
         </div>
-        {state && !state.success ? <p className="text-sm text-destructive">{state.message}</p> : null}
+        {state?.success ? (
+          <p className="text-sm text-muted-foreground text-center">
+            {state.message}{" "}
+            <Link href="/verify-email" className="text-blue-500 hover:underline">
+              Verify email
+            </Link>
+          </p>
+        ) : null}
         <div className="text-sm text-center text-muted-foreground">
           Already have an account?{" "}
           <Link href="/sign-in" className="text-blue-500 hover:underline">

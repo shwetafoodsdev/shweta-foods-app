@@ -6,10 +6,16 @@ const ShippingPage = async () => {
   const state = await getCheckoutState();
   const shipping = (state?.address || {}) as Record<string, string>;
 
-  async function onSubmit(formData: FormData) {
+  async function onSubmit(
+    _prevState: { success: boolean; message?: string } | null,
+    formData: FormData
+  ) {
     "use server";
-    await saveShippingAddress(formData);
-    redirect("/checkout/payment");
+    const result = await saveShippingAddress(formData);
+    if (result.success) {
+      redirect("/checkout/payment");
+    }
+    return result;
   }
 
   return (
