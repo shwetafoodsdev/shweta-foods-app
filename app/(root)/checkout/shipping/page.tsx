@@ -7,7 +7,7 @@ const ShippingPage = async () => {
   const shipping = (state?.address || {}) as Record<string, string>;
 
   async function onSubmit(
-    _prevState: { success: boolean; message?: string } | null,
+    _prevState: { success: boolean; message?: string } | null | void,
     formData: FormData
   ) {
     "use server";

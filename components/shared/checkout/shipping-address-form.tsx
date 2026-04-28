@@ -3,12 +3,14 @@
 import { useActionState, useMemo, useState } from "react";
 import { City, Country, State } from "country-state-city";
 
+type ShippingFormState = { success: boolean; message?: string } | null;
+
 type ShippingAddressFormProps = {
   initialShipping: Record<string, string>;
   action: (
-    state: { success: boolean; message?: string } | null,
+    state: ShippingFormState | void,
     formData: FormData
-  ) => Promise<{ success: boolean; message?: string } | void>;
+  ) => Promise<ShippingFormState | void>;
 };
 
 const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormProps) => {
