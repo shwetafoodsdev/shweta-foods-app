@@ -9,15 +9,6 @@ function revalidateCartAndHeader() {
   revalidatePath("/", "layout");
 }
 
-/** Cart hot path: one auth() call, no extra DB read (saves a round trip per action). */
-async function getSessionUserIdForCart() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("You must be signed in.");
-  }
-  return session.user.id;
-}
-
 async function requireUserId() {
   const session = await auth();
   if (!session?.user?.id) {
@@ -34,7 +25,7 @@ async function requireUserId() {
 }
 
 export async function getMyCartItems() {
-  const userId = await getSessionUserIdForCart();
+  const userId = await requireUserId();
   const items = await prisma.cartItem.findMany({
     where: { userId },
     include: { product: true },
@@ -78,7 +69,7 @@ export async function getCartQtyByProductIds(productIds: string[]): Promise<Reco
 
 export async function addToCart(productId: string, qty = 1) {
   try {
-    const userId = await getSessionUserIdForCart();
+    const userId = await requireUserId();
     const product = await prisma.product.findUnique({ where: { id: productId } });
     if (!product || product.stock < 1) {
       return { success: false, message: "Product is unavailable." };
@@ -103,8 +94,19 @@ export async function addToCart(productId: string, qty = 1) {
     revalidatePath(`/products/${product.slug}`);
     return { success: true };
   } catch (error) {
+    const prismaErrorCode =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      typeof (error as { code?: unknown }).code === "string"
+        ? (error as { code: string }).code
+        : null;
     const message =
-      error instanceof Error ? error.message : "Unable to add to cart right now.";
+      prismaErrorCode === "P2003"
+        ? "Your session is stale. Please sign in again."
+        : error instanceof Error
+          ? error.message
+          : "Unable to add to cart right now.";
     const requiresSignIn =
       message === "You must be signed in." || message === "Your session is stale. Please sign in again.";
     return { success: false, message, requiresSignIn };
@@ -113,7 +115,7 @@ export async function addToCart(productId: string, qty = 1) {
 
 export async function updateCartItemQty(productId: string, qty: number) {
   try {
-    const userId = await getSessionUserIdForCart();
+    const userId = await requireUserId();
     const existing = await prisma.cartItem.findUnique({
       where: { userId_productId: { userId, productId } },
       include: { product: true },
@@ -146,7 +148,7 @@ export async function updateCartItemQty(productId: string, qty: number) {
 
 export async function removeFromCart(productId: string) {
   try {
-    const userId = await getSessionUserIdForCart();
+    const userId = await requireUserId();
     await prisma.cartItem.delete({
       where: { userId_productId: { userId, productId } },
     });

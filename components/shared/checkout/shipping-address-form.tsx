@@ -1,14 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { City, Country, State } from "country-state-city";
 
 type ShippingAddressFormProps = {
   initialShipping: Record<string, string>;
-  action: (formData: FormData) => void | Promise<void>;
+  action: (
+    state: { success: boolean; message?: string } | null,
+    formData: FormData
+  ) => Promise<{ success: boolean; message?: string } | void>;
 };
 
 const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormProps) => {
+  const [formState, formAction, isPending] = useActionState(action, null);
   const countries = useMemo(() => Country.getAllCountries(), []);
   const indiaCountry = useMemo(
     () => countries.find((country) => country.name === "India"),
@@ -59,15 +63,33 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
   }, [countries]);
 
   return (
-    <form action={action} className="mt-6 rounded-xl border p-6 space-y-4">
+    <form action={formAction} className="mt-6 rounded-xl border p-6 space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1">
           <label className="text-sm font-medium">First Name *</label>
-          <input className="w-full rounded border px-3 py-2" name="firstName" defaultValue={initialShipping.firstName || ""} required />
+          <input
+            className="w-full rounded border px-3 py-2"
+            name="firstName"
+            defaultValue={initialShipping.firstName || ""}
+            autoComplete="given-name"
+            pattern="^[A-Za-z]+(?:[ '-][A-Za-z]+)*$"
+            minLength={2}
+            maxLength={40}
+            required
+          />
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Last Name *</label>
-          <input className="w-full rounded border px-3 py-2" name="lastName" defaultValue={initialShipping.lastName || ""} required />
+          <input
+            className="w-full rounded border px-3 py-2"
+            name="lastName"
+            defaultValue={initialShipping.lastName || ""}
+            autoComplete="family-name"
+            pattern="^[A-Za-z]+(?:[ '-][A-Za-z]+)*$"
+            minLength={2}
+            maxLength={40}
+            required
+          />
         </div>
       </div>
 
@@ -161,6 +183,11 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
             className="w-full rounded border px-3 py-2"
             name="postalCode"
             defaultValue={initialShipping.postalCode || ""}
+            autoComplete="postal-code"
+            inputMode="numeric"
+            pattern="^\d{4,10}$"
+            minLength={4}
+            maxLength={10}
             required
           />
         </div>
@@ -185,11 +212,25 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Mobile Phone *</label>
-          <input className="w-full rounded border px-3 py-2" name="phone" defaultValue={initialShipping.phone || ""} required />
+          <input
+            className="w-full rounded border px-3 py-2"
+            name="phone"
+            defaultValue={initialShipping.phone || ""}
+            autoComplete="tel-national"
+            inputMode="numeric"
+            pattern="^\d{7,15}$"
+            minLength={7}
+            maxLength={15}
+            required
+          />
         </div>
       </div>
 
-      <button type="submit" className="rounded bg-slate-900 px-4 py-2 text-white">
+      {formState && !formState.success ? (
+        <p className="text-sm text-destructive">{formState.message}</p>
+      ) : null}
+
+      <button type="submit" disabled={isPending} className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-60">
         Continue
       </button>
     </form>
