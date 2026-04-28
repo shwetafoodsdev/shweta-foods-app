@@ -40,6 +40,22 @@ export async function getReviewsByProductId(productId: string) {
   });
 }
 
+export async function getFeaturedReviews(limit = 3) {
+  return prisma.review.findMany({
+    where: { rating: { gte: 4 } },
+    include: {
+      user: {
+        select: { name: true },
+      },
+      product: {
+        select: { name: true, slug: true },
+      },
+    },
+    orderBy: [{ rating: "desc" }, { createdAt: "desc" }],
+    take: limit,
+  });
+}
+
 export async function createReview(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {

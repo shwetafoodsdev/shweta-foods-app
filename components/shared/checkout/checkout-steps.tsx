@@ -15,7 +15,8 @@ const CheckoutSteps = () => {
   const activeIndex = steps.findIndex((step) => pathname === step.href);
 
   return (
-    <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+    <div className="sticky top-40 z-40 rounded-2xl border border-border/70 bg-background/95 p-3 backdrop-blur md:top-24">
+      <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
       {steps.map((step, index) => {
         const isActive = pathname === step.href;
         const isAccessible = activeIndex === -1 || index <= activeIndex;
@@ -45,6 +46,7 @@ const CheckoutSteps = () => {
           </Link>
         );
       })}
+      </div>
     </div>
   );
 };

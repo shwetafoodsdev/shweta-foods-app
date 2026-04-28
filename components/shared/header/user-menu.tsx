@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Session } from "next-auth";
+import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { User } from "lucide-react";
@@ -23,7 +23,7 @@ const UserMenu = ({ session }: { session: Session | null }) => {
           <Button
             type="button"
             variant="ghost"
-            className="shrink-0 gap-2 px-2 sm:px-3"
+            className="shrink-0 gap-2 rounded-full border border-border/70 bg-card/70 px-3 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
             aria-label="Account: appearance and sign in"
           >
             <User className="size-5 shrink-0" />
@@ -52,7 +52,7 @@ const UserMenu = ({ session }: { session: Session | null }) => {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="size-9 rounded-full border border-border bg-muted/80 text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="size-11 rounded-full border border-border/70 bg-card/80 text-sm font-semibold text-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label="Open profile menu"
         >
           {initial.toUpperCase()}

@@ -12,6 +12,7 @@ import { canUserReviewProduct, createReview, getReviewsByProductId } from "@/lib
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import PageBreadcrumb from "@/components/shared/page-breadcrumb";
+import ReviewForm from "@/components/shared/product/review-form";
 
 type ProductReview = Awaited<ReturnType<typeof getReviewsByProductId>>[number];
 
@@ -128,20 +129,7 @@ const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
           <p className="text-muted-foreground">No reviews yet.</p>
         )}
         {session?.user && canReview ? (
-          <form action={onReviewSubmit} className="mt-6 rounded-lg border p-4 space-y-3">
-            <input type="hidden" name="productId" value={product.id} />
-            <h3 className="font-semibold">Write a review</h3>
-            <select name="rating" defaultValue="5" className="border rounded px-3 py-2 w-full" required>
-              {[5, 4, 3, 2, 1].map((value) => (
-                <option key={value} value={value}>
-                  {value} stars
-                </option>
-              ))}
-            </select>
-            <input className="border rounded px-3 py-2 w-full" name="title" placeholder="Review title" />
-            <textarea className="border rounded px-3 py-2 w-full" name="comment" rows={4} placeholder="Share your experience" />
-            <Button type="submit">Submit Review</Button>
-          </form>
+          <ReviewForm productId={product.id} action={onReviewSubmit} />
         ) : session?.user ? (
           <p className="mt-4 text-sm text-muted-foreground">
             You can write a review only after placing an order for this product.

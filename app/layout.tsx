@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "@/assets/styles/globals.css";
 import { APP_NAME, SERVER_URL, APP_DESCRIPTION, DEAL_CREDIT_TEXT } from "@/lib/constants";
 import { ThemeProvider } from "next-themes";
-import { auth } from "@/auth";
 import { AuthSessionProvider } from "@/components/providers/auth-session-provider";
 import { AppToaster } from "@/components/app-toaster";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
   title: {
@@ -26,12 +26,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
-
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
-        <AuthSessionProvider session={session}>
+      <body className={`${inter.variable} ${playfair.variable} ${inter.className} antialiased`}>
+        <AuthSessionProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

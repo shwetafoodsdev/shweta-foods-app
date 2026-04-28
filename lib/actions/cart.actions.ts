@@ -3,14 +3,23 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { cache } from "react";
 
 function revalidateCartAndHeader() {
   revalidatePath("/cart");
   revalidatePath("/", "layout");
 }
 
+const getSafeSession = cache(async () => {
+  try {
+    return await auth();
+  } catch {
+    return null;
+  }
+});
+
 async function requireUserId() {
-  const session = await auth();
+  const session = await getSafeSession();
   if (!session?.user?.id) {
     throw new Error("You must be signed in.");
   }
@@ -46,7 +55,7 @@ export async function getCartSummary() {
 
 /** Total number of product units in the signed-in user’s cart; 0 if not signed in. */
 export async function getCartItemCount(): Promise<number> {
-  const session = await auth();
+  const session = await getSafeSession();
   if (!session?.user?.id) return 0;
   const result = await prisma.cartItem.aggregate({
     where: { userId: session.user.id },
@@ -58,7 +67,7 @@ export async function getCartItemCount(): Promise<number> {
 /** For listing pages: per-product line quantities for the current user. */
 export async function getCartQtyByProductIds(productIds: string[]): Promise<Record<string, number>> {
   if (productIds.length === 0) return {};
-  const session = await auth();
+  const session = await getSafeSession();
   if (!session?.user?.id) return {};
   const rows = await prisma.cartItem.findMany({
     where: { userId: session.user.id, productId: { in: productIds } },

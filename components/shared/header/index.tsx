@@ -13,51 +13,75 @@ import { auth } from '@/auth';
 const Header = async () => {
     const [categories, session, cartCount] = await Promise.all([
         getProductCategories(),
-        auth(),
+        auth().catch(() => null),
         getCartItemCount(),
     ]);
     return (
-        <header className="w-full border-b fixed top-0 left-0 bg-background z-50 h-16 flex ">
-            <div className="wrapper flex-between">
-                <div className="flex-start shrink-0 gap-3">
-                    <Link href="/" className="flex-start">
-                        <Image
-                            src="/images/logo.svg"
-                            alt={`${APP_NAME} logo`}
-                            height={36}
-                            width={36}
-                        />
-                        <span className="hidden lg:block font-bold text-2xl ml-3">
-                            {APP_NAME}
-                        </span>
-                    </Link>
-                </div>
-                <div className="min-w-0 flex-1 px-1.5 sm:px-3">
-                    <SearchBar categories={categories} />
-                </div>
-                <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-                    <Button asChild variant="ghost" size="icon" className="relative shrink-0" title="Cart">
-                        <Link
-                            href="/cart"
-                            className="relative"
-                            aria-label={
-                                cartCount > 0
-                                    ? `Shopping cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}`
-                                    : 'Shopping cart'
-                            }
-                        >
-                            <ShoppingCart className="size-5" aria-hidden />
-                            {cartCount > 0 ? (
-                                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-slate-900 px-0.5 text-[10px] font-semibold leading-none text-white tabular-nums dark:bg-slate-100 dark:text-slate-900">
-                                    {cartCount > 99 ? '99+' : cartCount}
-                                </span>
-                            ) : null}
-                        </Link>
-                    </Button>
-                    <UserMenu session={session} />
-                </div>
-            </div>
-        </header>
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
+        <div className="wrapper flex min-h-20 items-center gap-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <Link href="/" className="group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.01]">
+              <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-white to-accent/20 shadow-sm ring-1 ring-primary/10">
+                <Image
+                  src="/images/logo.svg"
+                  alt={`${APP_NAME} logo`}
+                  height={36}
+                  width={36}
+                />
+              </span>
+              <div className="hidden sm:block">
+                <span className="block text-2xl font-semibold tracking-tight text-foreground" style={{ fontFamily: "var(--font-heading)" }}>
+                  {APP_NAME}
+                </span>
+                <span className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                  Homemade premium snacks
+                </span>
+              </div>
+            </Link>
+          </div>
+          <div className="hidden min-w-0 flex-[1.4] md:block">
+            <SearchBar categories={categories} />
+          </div>
+          <nav className="hidden items-center gap-1 lg:flex">
+            <Link href="/" className="rounded-full px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary">
+              Home
+            </Link>
+            <Link href="/products" className="rounded-full px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary">
+              Shop
+            </Link>
+          </nav>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              asChild
+              variant="ghost"
+              size="icon"
+              className="relative size-11 rounded-full border border-border/70 bg-card/70 text-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
+              title="Cart"
+            >
+              <Link
+                href="/cart"
+                className="relative"
+                aria-label={
+                  cartCount > 0
+                    ? `Shopping cart, ${cartCount} ${cartCount === 1 ? 'item' : 'items'}`
+                    : 'Shopping cart'
+                }
+              >
+                <ShoppingCart className="size-5" aria-hidden />
+                {cartCount > 0 ? (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground tabular-nums">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                ) : null}
+              </Link>
+            </Button>
+            <UserMenu session={session} />
+          </div>
+        </div>
+        <div className="wrapper pb-3 md:hidden">
+          <SearchBar categories={categories} />
+        </div>
+      </header>
     );
 };
 

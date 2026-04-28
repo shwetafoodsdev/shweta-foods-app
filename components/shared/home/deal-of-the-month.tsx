@@ -52,26 +52,27 @@ const DealOfTheMonth = ({ product }: { product: DealProduct | null }) => {
   if (!product || !target) return null;
 
   return (
-    <section className="my-14 grid gap-6 md:grid-cols-2 md:items-center">
-      <div className="space-y-4">
-        <h2 className="h2-bold">Deal Of The Day</h2>
-        {/* <p className="text-muted-foreground">
-          Get ready for unbeatable savings and limited-time offers on your favorite product.
-        </p> */}
+    <section className="section-shell my-14 grid gap-10 overflow-hidden p-8 md:grid-cols-2 md:items-center md:p-10">
+      <div className="space-y-5">
+        <div className="section-heading">Festive special pick</div>
+        <h2 className="h2-bold text-foreground">Deal Of The Day</h2>
+        <p className="max-w-xl text-base leading-7 text-muted-foreground">
+          Freshly prepared favorites, packed with the warmth of home and a little festive indulgence for your snack table.
+        </p>
         <div className="space-y-1">
-          <p>{product.brand}</p>
-          <h3 className="text-2xl font-semibold">{product.name}</h3>
+          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary/80">{product.brand}</p>
+          <h3 className="text-3xl font-semibold text-foreground" style={{ fontFamily: "var(--font-heading)" }}>{product.name}</h3>
         </div>
         <div className="flex w-full flex-wrap items-center justify-start gap-4 text-left">
           <RatingStars value={product.rating} />
-          <div className="text-left font-bold text-green-700">
+          <div className="text-left text-2xl font-bold text-accent">
             {formatCurrencyFromCents(product.price)}
           </div>
         </div>
         <div className="grid max-w-sm grid-cols-3 gap-4">
           {timeLabels.map(({ key, label }) => (
-            <div key={label} className="text-center">
-              <div className="min-h-9 text-2xl font-bold tabular-nums" aria-live={mounted ? "polite" : undefined}>
+            <div key={label} className="rounded-2xl border border-border/60 bg-background/80 px-4 py-3 text-center shadow-sm">
+              <div className="min-h-9 text-2xl font-bold tabular-nums text-foreground" aria-live={mounted ? "polite" : undefined}>
                 {mounted ? (
                   String(remaining[key]).padStart(2, "0")
                 ) : (
@@ -85,17 +86,18 @@ const DealOfTheMonth = ({ product }: { product: DealProduct | null }) => {
             </div>
           ))}
         </div>
-        <Link href={`/products/${product.slug}`} className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-white">
+        <Link href={`/products/${product.slug}`} className="inline-flex rounded-full bg-primary px-6 py-3 font-medium text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-secondary">
           View Product
         </Link>
       </div>
-      <div className="flex justify-center">
+      <div className="relative flex justify-center">
+        <div className="warm-gradient absolute inset-4 rounded-[2rem] blur-2xl" />
         <Image
           src={product.images[0]}
           alt={product.name}
           width={360}
           height={300}
-          className="h-[260px] w-auto object-contain"
+          className="relative h-[280px] w-auto object-contain"
         />
       </div>
     </section>

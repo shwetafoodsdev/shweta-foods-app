@@ -16,10 +16,10 @@ const ProductList = ({
   const limitedData = limit ? data.slice(0, limit) : data;
 
   return (
-    <div className="my-10">
-      <h2 className="h2-bold mb-4">{title}</h2>
+    <section className="my-12">
+      {title ? <h2 className="h2-bold mb-6 text-foreground">{title}</h2> : null}
       {limitedData.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center sm:justify-items-stretch">
+        <div className="grid grid-cols-1 gap-6 justify-items-center sm:grid-cols-2 sm:justify-items-stretch lg:grid-cols-4">
           {limitedData.map((product: Product) => (
             <ProductCard
               key={product.slug}
@@ -29,9 +29,9 @@ const ProductList = ({
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500">No products found.</p>
+        <p className="text-center text-muted-foreground">No products found.</p>
       )}
-    </div>
+    </section>
   );
 };
 
