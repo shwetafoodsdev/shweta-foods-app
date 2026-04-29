@@ -13,7 +13,7 @@ const HomeFeatureStrip = ({ hidden = true }: { hidden?: boolean }) => {
   return (
     <section className="section-shell mt-6 mb-12 grid gap-4 p-6 md:grid-cols-4">
       {items.map((item) => (
-        <div key={item.title} className="soft-lift rounded-2xl bg-background/80 p-4">
+        <div key={item.title} className="theme-surface soft-lift rounded-2xl p-4">
           <div className="mb-3 flex size-11 items-center justify-center rounded-2xl bg-primary/15 text-primary">
             <item.icon className="size-5" />
           </div>

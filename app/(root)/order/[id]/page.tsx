@@ -21,7 +21,7 @@ const OrderDetailsPage = async ({
   }
 
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <section className="space-y-4">
         <h1 className="h2-bold">Order {formatDisplayId("ORD", order.id)}</h1>
         <div className="rounded border p-4">

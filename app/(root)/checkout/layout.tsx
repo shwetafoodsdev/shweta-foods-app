@@ -6,9 +6,9 @@ export default async function CheckoutLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mt-2">
+    <div>
       <CheckoutSteps />
-      <div className="mt-8 max-w-2xl">{children}</div>
+      <div className="mt-5 max-w-2xl">{children}</div>
     </div>
   );
 }

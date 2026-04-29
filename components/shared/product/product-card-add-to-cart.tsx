@@ -38,7 +38,7 @@ const ProductCardAddToCart = ({ productId, stock, initialQty }: Props) => {
     <Button
       type="button"
       variant="outline"
-      className="h-9 w-full min-h-9 gap-2 rounded-lg border-border/50 bg-card px-3 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-muted/50"
+      className="theme-surface h-9 w-full min-h-9 gap-2 rounded-lg border-border/50 px-3 text-xs font-medium text-foreground shadow-none transition-colors hover:bg-muted/50"
       disabled={adding}
       aria-busy={adding}
       onClick={async (e) => {

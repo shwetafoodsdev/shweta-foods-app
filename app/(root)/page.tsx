@@ -51,16 +51,16 @@ const Homepage = async () => {
 
   return (
     <>
-      <section className="warm-gradient relative mb-14 overflow-hidden rounded-[2.5rem] border border-border/60 px-6 py-12 shadow-[0_24px_80px_rgba(93,64,55,0.12)] md:px-10 md:py-14 dark:border-white/10 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+      <section className="warm-gradient relative mb-10 overflow-hidden rounded-[1.75rem] border border-border/60 px-5 py-7 shadow-[0_24px_80px_rgba(93,64,55,0.12)] sm:py-9 md:mb-14 md:rounded-[2.5rem] md:px-10 md:py-12 dark:border-white/10 dark:shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
         <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.42),transparent_55%)] dark:bg-[radial-gradient(circle_at_center,rgba(230,126,34,0.18),transparent_58%)]" />
-        <div className="grid items-center gap-10 md:grid-cols-[1.1fr_0.9fr]">
-          <div className="relative z-10 max-w-2xl space-y-6">
+        <div className="grid items-center gap-8 md:grid-cols-[1.1fr_0.9fr] md:gap-10">
+          <div className="relative z-10 max-w-2xl space-y-5 md:space-y-6">
             <div className="section-heading">Premium homemade snacks</div>
             <div className="space-y-4">
-              <h1 className="text-5xl font-semibold tracking-tight text-foreground md:text-6xl" style={{ fontFamily: "var(--font-heading)" }}>
+              <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl" style={{ fontFamily: "var(--font-heading)" }}>
                 Shweta Foods
               </h1>
-              <p className="max-w-xl text-xl leading-8 text-foreground/85 md:text-2xl">
+              <p className="max-w-xl text-lg leading-8 text-foreground/85 sm:text-xl md:text-2xl">
                 Authentic Homemade Taste Delivered
               </p>
               <p className="max-w-xl text-base leading-7 text-muted-foreground dark:text-foreground/75">
@@ -71,24 +71,20 @@ const Homepage = async () => {
               <Link href="/products" className="rounded-full bg-primary px-7 py-3 font-medium text-primary-foreground transition-all duration-300 hover:-translate-y-0.5 hover:bg-secondary">
                 Shop Now
               </Link>
-              <Link href="#why-choose-us" className="rounded-full border border-secondary/20 bg-white/70 px-7 py-3 font-medium text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary dark:border-white/20 dark:bg-black/25 dark:text-foreground">
+              <Link href="#why-choose-us" className="rounded-full border border-secondary/20 bg-background/70 px-7 py-3 font-medium text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary dark:border-white/20 dark:bg-black/25 dark:text-foreground">
                 Why Choose Us
               </Link>
             </div>
           </div>
           <div className="relative z-10">
-            <div className="section-shell overflow-hidden p-6 md:p-8 dark:bg-black/20">
-              <div className="warm-gradient relative rounded-[2rem] p-4 dark:ring-1 dark:ring-white/10">
-                <Image
-                  src={dealProductData?.images[0] ?? "/images/sample-product.jpg"}
-                  alt={dealProductData?.name ?? "Shweta Foods assortment"}
-                  width={620}
-                  height={460}
-                  className="mx-auto h-[300px] w-full object-contain md:h-[360px]"
-                  priority
-                />
-              </div>
-            </div>
+            <Image
+              src={dealProductData?.images[0] ?? "/images/sample-product.jpg"}
+              alt={dealProductData?.name ?? "Shweta Foods assortment"}
+              width={620}
+              height={460}
+              className="mx-auto h-[300px] w-full object-contain md:h-[360px]"
+              priority
+            />
           </div>
         </div>
       </section>
@@ -97,6 +93,7 @@ const Homepage = async () => {
         data={bestSellers}
         title="Best Sellers"
         cartQtyByProductId={cartQtyByProductId}
+        compactMobile
       />
 
       <DealOfTheMonth product={dealProductData} />
@@ -105,12 +102,14 @@ const Homepage = async () => {
         data={festiveSpecials}
         title="Festive Specials"
         cartQtyByProductId={cartQtyByProductId}
+        compactMobile
       />
 
       <ProductList
         data={products}
         title="Shop snacks & savouries"
         cartQtyByProductId={cartQtyByProductId}
+        compactMobile
       />
       <div className="flex justify-center">
         <Link href="/products" className="rounded-full bg-secondary px-7 py-3 text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary">
@@ -129,7 +128,7 @@ const Homepage = async () => {
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {whyChooseUs.map((item) => (
-            <div key={item.title} className="soft-lift rounded-[1.75rem] border border-border/60 bg-background/85 p-6">
+            <div key={item.title} className="theme-surface soft-lift rounded-[1.75rem] border border-border/60 p-6">
               <h3 className="mb-3 text-2xl font-semibold text-foreground" style={{ fontFamily: "var(--font-heading)" }}>
                 {item.title}
               </h3>
@@ -150,7 +149,7 @@ const Homepage = async () => {
         {featuredReviews.length > 0 ? (
           <div className="grid gap-5 md:grid-cols-3">
             {featuredReviews.map((review: FeaturedReview) => (
-              <div key={review.id} className="soft-lift rounded-[1.75rem] border border-border/60 bg-background/85 p-6">
+              <div key={review.id} className="theme-surface soft-lift rounded-[1.75rem] border border-border/60 p-6">
               <div className="mb-4 flex gap-1 text-primary">
                 {Array.from({ length: 5 }).map((_, index) => (
                   <Star
@@ -170,7 +169,7 @@ const Homepage = async () => {
             ))}
           </div>
         ) : (
-          <div className="rounded-[1.75rem] border border-border/60 bg-background/85 p-6 text-sm leading-7 text-muted-foreground">
+          <div className="theme-surface rounded-[1.75rem] border border-border/60 p-6 text-sm leading-7 text-muted-foreground">
             Customer reviews with 4+ stars will appear here automatically once they are added.
           </div>
         )}

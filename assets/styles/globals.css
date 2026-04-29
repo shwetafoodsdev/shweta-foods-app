@@ -6,10 +6,10 @@
 @tailwind utilities;
 
 @layer utilities {
+  /* Horizontal padding only — never use `padding` shorthand here or it overrides `pt-*`
+     on the same element (e.g. main’s offset below the fixed header). */
   .wrapper {
-    @apply max-w-7xl p-5 w-full;
-    margin-left: auto;
-    margin-right: auto;
+    @apply mx-auto w-full max-w-7xl px-5;
   }
 
   .flex-start {
@@ -40,7 +40,13 @@
   }
 
   .section-shell {
-    @apply rounded-[2rem] border border-border bg-card shadow-[0_20px_60px_rgba(93,64,55,0.08)] backdrop-blur-sm;
+    @apply rounded-[2rem] border border-border shadow-[0_20px_60px_rgba(93,64,55,0.08)] backdrop-blur-sm;
+    background: linear-gradient(
+      160deg,
+      hsla(var(--card), 0.92) 0%,
+      hsla(var(--background), 0.92) 55%,
+      hsla(var(--muted), 0.55) 100%
+    );
   }
 
   .section-heading {
@@ -62,6 +68,39 @@
 
   .soft-lift {
     @apply transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_22px_48px_rgba(93,64,55,0.14)];
+  }
+
+  .theme-surface {
+    background: linear-gradient(
+      160deg,
+      hsla(var(--card), 0.92) 0%,
+      hsla(var(--background), 0.92) 55%,
+      hsla(var(--muted), 0.55) 100%
+    );
+  }
+
+  @keyframes logo-3d-spin {
+    0% {
+      transform: rotateX(0deg) rotateY(0deg);
+    }
+    25% {
+      transform: rotateX(18deg) rotateY(90deg);
+    }
+    50% {
+      transform: rotateX(0deg) rotateY(180deg);
+    }
+    75% {
+      transform: rotateX(-18deg) rotateY(270deg);
+    }
+    100% {
+      transform: rotateX(0deg) rotateY(360deg);
+    }
+  }
+
+  .animate-logo-3d {
+    animation: logo-3d-spin 2s ease-in-out infinite;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
 }
 
@@ -88,6 +127,8 @@
 
 @layer base {
   :root {
+    /* Single-row header: align main padding with header height (matches horizontal gutter rhythm with px-5). */
+    --site-header-offset: calc(env(safe-area-inset-top, 0px) + 5.5rem);
     --background: 34 100% 97%;
     --foreground: 18 25% 20%;
     --card: 30 100% 98%;
@@ -165,6 +206,8 @@
       radial-gradient(circle at top left, rgba(230, 126, 34, 0.16), transparent 22rem),
       radial-gradient(circle at top right, rgba(109, 159, 113, 0.12), transparent 20rem),
       linear-gradient(180deg, rgba(255, 248, 240, 0.95), rgba(255, 244, 234, 0.98));
+    background-repeat: no-repeat;
+    background-size: cover;
   }
 
   .dark body {
@@ -172,6 +215,8 @@
       radial-gradient(circle at top left, rgba(230, 126, 34, 0.14), transparent 18rem),
       radial-gradient(circle at top right, rgba(109, 159, 113, 0.1), transparent 16rem),
       linear-gradient(180deg, rgba(24, 20, 17, 0.98), rgba(16, 14, 12, 1));
+    background-repeat: no-repeat;
+    background-size: cover;
   }
 
   input[type="password"]::-ms-reveal,
@@ -191,15 +236,22 @@
   html {
     @apply font-sans;
     font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     scrollbar-gutter: stable;
     scroll-behavior: smooth;
-    scroll-padding-top: 11rem;
+    scroll-padding-top: var(--site-header-offset);
+    overflow-x: hidden;
   }
 
   @media (min-width: 768px) {
+    :root {
+      /* Taller bar: min-h-20 + vertical padding */
+      --site-header-offset: calc(env(safe-area-inset-top, 0px) + 7rem);
+    }
+
     html {
       font-size: 16px;
-      scroll-padding-top: 6rem;
     }
   }
 

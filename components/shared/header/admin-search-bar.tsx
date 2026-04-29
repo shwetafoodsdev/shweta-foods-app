@@ -40,11 +40,11 @@ const AdminSearchBar = () => {
   };
 
   return (
-    <form onSubmit={onSubmit} className="hidden md:flex items-center overflow-hidden rounded border bg-background">
+    <form onSubmit={onSubmit} className="flex min-w-0 flex-1 items-center overflow-hidden rounded border bg-background md:w-auto md:flex-none">
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        className="h-9 w-52 px-3 text-sm outline-none"
+        className="h-9 min-w-0 flex-1 px-3 text-sm outline-none md:w-52 md:flex-none"
         placeholder={placeholder}
       />
       <button

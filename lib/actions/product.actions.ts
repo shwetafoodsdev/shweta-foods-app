@@ -127,10 +127,32 @@ export async function getFilteredProducts(params: {
     ...visibleProductsFilter,
     ...(q
       ? {
-          name: {
-            contains: q,
-            mode: Prisma.QueryMode.insensitive,
-          },
+          OR: [
+            {
+              name: {
+                contains: q,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+            {
+              category: {
+                contains: q,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+            {
+              brand: {
+                contains: q,
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+            {
+              slug: {
+                contains: q.toLowerCase().replace(/\s+/g, "-"),
+                mode: Prisma.QueryMode.insensitive,
+              },
+            },
+          ],
         }
       : {}),
     ...(category && category !== "all" ? { category } : {}),
@@ -171,7 +193,13 @@ export async function getFilteredProducts(params: {
   } catch (error) {
     if (isDatabaseInitializationError(error)) {
       const fallback = getFallbackProducts().filter((product) => {
-        const qMatch = q ? product.name.toLowerCase().includes(q.toLowerCase()) : true;
+        const normalizedQuery = q?.trim().toLowerCase() ?? "";
+        const qMatch = normalizedQuery
+          ? product.name.toLowerCase().includes(normalizedQuery) ||
+            product.category.toLowerCase().includes(normalizedQuery) ||
+            product.brand.toLowerCase().includes(normalizedQuery) ||
+            product.slug.toLowerCase().includes(normalizedQuery.replace(/\s+/g, "-"))
+          : true;
         const categoryMatch = category && category !== "all" ? product.category === category : true;
         const minPriceMatch = minPrice !== undefined ? product.price >= minPrice : true;
         const maxPriceMatch = maxPrice !== undefined ? product.price <= maxPrice : true;

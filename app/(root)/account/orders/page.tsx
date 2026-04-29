@@ -9,7 +9,7 @@ const AccountOrdersPage = async () => {
 
   if (orders.length === 0) {
     return (
-      <div className="mt-8">
+      <div>
         <h1 className="h2-bold mb-4">Order History</h1>
         <div className="mx-auto w-full max-w-xl rounded-2xl border bg-card p-8 text-center shadow-sm md:p-10 space-y-4">
           <h2 className="text-3xl font-bold tracking-tight">No Orders Yet</h2>
@@ -31,7 +31,7 @@ const AccountOrdersPage = async () => {
   }
 
   return (
-    <div className="mt-8">
+    <div>
       <h1 className="h2-bold mb-4">Order History</h1>
       <div className="rounded border overflow-hidden">
         <div className="grid grid-cols-4 gap-3 border-b bg-muted/40 p-3 text-sm font-medium">

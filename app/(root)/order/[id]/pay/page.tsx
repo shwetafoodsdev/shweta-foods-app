@@ -12,7 +12,7 @@ const OrderPayPage = async ({
   if (!order) notFound();
 
   return (
-    <div className="mt-8 max-w-xl rounded border p-6">
+    <div className="max-w-xl rounded border p-6">
       <h1 className="h2-bold mb-2">Stripe Checkout</h1>
       <p className="text-muted-foreground">
         Stripe payment flow will be completed in the next phase. For now, use Cash On Delivery or admin-paid orders.

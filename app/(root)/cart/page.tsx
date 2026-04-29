@@ -32,7 +32,7 @@ const CartPage = async () => {
 
   if (!session?.user) {
     return (
-      <div className="mt-8">
+      <div>
         <h1 className="h2-bold mb-4">Shopping Cart</h1>
         <p className="mt-4 text-muted-foreground">
           Please <Link className="underline" href="/sign-in">sign in</Link> to view your cart.
@@ -46,7 +46,7 @@ const CartPage = async () => {
     summary = await getCartSummary();
   } catch {
     return (
-      <div className="mt-8">
+      <div>
         <h1 className="h2-bold mb-4">Shopping Cart</h1>
         <EmptyCartCard />
       </div>
@@ -55,7 +55,7 @@ const CartPage = async () => {
 
   if (summary.items.length === 0) {
     return (
-      <div className="mt-8">
+      <div>
         <h1 className="h2-bold mb-4">Shopping Cart</h1>
         <EmptyCartCard />
       </div>
@@ -63,7 +63,7 @@ const CartPage = async () => {
   }
 
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+    <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <section>
         <h1 className="h2-bold mb-4">Shopping Cart</h1>
         <div className="rounded-lg border p-4">

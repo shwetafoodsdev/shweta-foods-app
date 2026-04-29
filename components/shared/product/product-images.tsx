@@ -9,13 +9,13 @@ const ProductImages = ({ images }: { images: string[] }) => {
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image */}
-      <div className=" flex items-center justify-center bg-white">
+      <div className="overflow-hidden rounded-xl">
         <Image
           src={images[current]}
           alt="product image"
           width={500}
           height={500}
-          className="object-contain h-[300px] w-full"
+          className="h-[260px] w-full object-cover sm:h-[300px] sm:object-contain"
           priority
           sizes="(max-width: 768px) 100vw, 500px"
         />

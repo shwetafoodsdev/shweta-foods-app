@@ -65,12 +65,17 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
   }, [countries]);
 
   return (
-    <form action={formAction} className="mt-6 rounded-xl border p-6 space-y-4">
+    <form action={formAction} className="theme-surface mt-6 space-y-4 rounded-xl border p-6">
+      {(() => {
+        const fieldClass =
+          "w-full rounded border border-border/70 bg-muted/40 px-3 py-2 text-foreground outline-none transition-colors focus:border-primary/50";
+        return (
+          <>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1">
           <label className="text-sm font-medium">First Name *</label>
           <input
-            className="w-full rounded border px-3 py-2"
+            className={fieldClass}
             name="firstName"
             defaultValue={initialShipping.firstName || ""}
             autoComplete="given-name"
@@ -83,7 +88,7 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         <div className="space-y-1">
           <label className="text-sm font-medium">Last Name *</label>
           <input
-            className="w-full rounded border px-3 py-2"
+            className={fieldClass}
             name="lastName"
             defaultValue={initialShipping.lastName || ""}
             autoComplete="family-name"
@@ -99,7 +104,7 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         <div className="space-y-1">
           <label className="text-sm font-medium">Country *</label>
           <select
-            className="w-full rounded border px-3 py-2 bg-background"
+            className={fieldClass}
             name="country"
             value={selectedCountry?.name || ""}
             onChange={(event) => {
@@ -129,7 +134,7 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         <div className="space-y-1">
           <label className="text-sm font-medium">State *</label>
           <select
-            className="w-full rounded border px-3 py-2 bg-background"
+            className={fieldClass}
             name="state"
             value={states.find((item) => item.isoCode === stateCode)?.name || ""}
             onChange={(event) => {
@@ -155,7 +160,7 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         <div className="space-y-1">
           <label className="text-sm font-medium">City *</label>
           <select
-            className="w-full rounded border px-3 py-2 bg-background"
+            className={fieldClass}
             name="city"
             value={cityName}
             onChange={(event) => setCityName(event.target.value)}
@@ -170,19 +175,19 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Address Line 1 *</label>
-          <input className="w-full rounded border px-3 py-2" name="address1" defaultValue={initialShipping.address1 || ""} required />
+          <input className={fieldClass} name="address1" defaultValue={initialShipping.address1 || ""} required />
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-1">
           <label className="text-sm font-medium">Address Line 2</label>
-          <input className="w-full rounded border px-3 py-2" name="address2" defaultValue={initialShipping.address2 || ""} />
+          <input className={fieldClass} name="address2" defaultValue={initialShipping.address2 || ""} />
         </div>
         <div className="space-y-1">
           <label className="text-sm font-medium">Postal Code *</label>
           <input
-            className="w-full rounded border px-3 py-2"
+            className={fieldClass}
             name="postalCode"
             defaultValue={initialShipping.postalCode || ""}
             autoComplete="postal-code"
@@ -199,7 +204,7 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         <div className="space-y-1">
           <label className="text-sm font-medium">Country Code *</label>
           <select
-            className="w-full rounded border px-3 py-2 bg-background"
+            className={fieldClass}
             name="countryCode"
             value={dialCode}
             onChange={(event) => setDialCode(event.target.value)}
@@ -215,7 +220,7 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
         <div className="space-y-1">
           <label className="text-sm font-medium">Mobile Phone *</label>
           <input
-            className="w-full rounded border px-3 py-2"
+            className={fieldClass}
             name="phone"
             defaultValue={initialShipping.phone || ""}
             autoComplete="tel-national"
@@ -235,6 +240,9 @@ const ShippingAddressForm = ({ initialShipping, action }: ShippingAddressFormPro
       <button type="submit" disabled={isPending} className="rounded bg-slate-900 px-4 py-2 text-white disabled:opacity-60">
         Continue
       </button>
+          </>
+        );
+      })()}
     </form>
   );
 };

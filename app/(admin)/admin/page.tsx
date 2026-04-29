@@ -48,27 +48,29 @@ const AdminDashboardPage = async ({
       </div>
       <div>
         <h2 className="h3-bold mb-4">Not Delivered Orders</h2>
-        <div className="rounded border overflow-hidden">
-          <div className="grid grid-cols-[110px_1fr_140px_120px_140px_100px] gap-3 bg-muted/40 p-3 text-xs font-semibold uppercase">
-            <span>ID</span>
-            <span>Customer</span>
-            <span>Date</span>
-            <span>Total</span>
-            <span>Status</span>
-            <span>Action</span>
-          </div>
-          {undeliveredOrders.length ? undeliveredOrders.map((order: AdminDashboardOrder) => (
-            <div key={order.id} className="grid grid-cols-[110px_1fr_140px_120px_140px_100px] gap-3 border-t p-3 text-sm items-center">
-              <span>{formatDisplayId("ORD", order.id)}</span>
-              <span>{order.user.name || order.user.email}</span>
-              <span>{order.createdAt.toLocaleDateString()}</span>
-              <span>{formatCurrencyFromCents(order.totalPrice)}</span>
-              <span>Not delivered</span>
-              <Link href={`/admin/orders/${order.id}`} className="underline">
-                Details
-              </Link>
+        <div className="overflow-x-auto rounded border">
+          <div className="min-w-[760px]">
+            <div className="grid grid-cols-[110px_1fr_140px_120px_140px_100px] gap-3 bg-muted/40 p-3 text-xs font-semibold uppercase">
+              <span>ID</span>
+              <span>Customer</span>
+              <span>Date</span>
+              <span>Total</span>
+              <span>Status</span>
+              <span>Action</span>
             </div>
-          )) : <div className="border-t p-4 text-sm text-muted-foreground">No not-delivered orders match your search.</div>}
+            {undeliveredOrders.length ? undeliveredOrders.map((order: AdminDashboardOrder) => (
+              <div key={order.id} className="grid grid-cols-[110px_1fr_140px_120px_140px_100px] gap-3 border-t p-3 text-sm items-center">
+                <span>{formatDisplayId("ORD", order.id)}</span>
+                <span className="truncate">{order.user.name || order.user.email}</span>
+                <span>{order.createdAt.toLocaleDateString()}</span>
+                <span>{formatCurrencyFromCents(order.totalPrice)}</span>
+                <span>Not delivered</span>
+                <Link href={`/admin/orders/${order.id}`} className="underline">
+                  Details
+                </Link>
+              </div>
+            )) : <div className="border-t p-4 text-sm text-muted-foreground">No not-delivered orders match your search.</div>}
+          </div>
         </div>
       </div>
     </div>

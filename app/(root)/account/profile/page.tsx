@@ -8,7 +8,7 @@ const ProfilePage = async () => {
   }
 
   return (
-    <div className="mt-8 max-w-xl">
+    <div className="max-w-xl">
       <h1 className="h2-bold mb-4">User Profile</h1>
       <div className="rounded border p-4 space-y-2">
         <p><span className="font-semibold">Name:</span> {session.user.name}</p>

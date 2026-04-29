@@ -52,12 +52,12 @@ const AdminOrderDetailsPage = async ({
             {order.deliveredAt ? "Delivered" : "Not delivered"}
           </span>
         </div>
-        <div className="rounded border p-4">
+        <div className="overflow-x-auto rounded border p-4">
           <h2 className="font-semibold mb-3">Order Items</h2>
-          <div className="space-y-2">
+          <div className="min-w-[360px] space-y-2">
             {order.orderItems.map((item: OrderItem) => (
-              <div key={item.id} className="grid grid-cols-[1fr_auto_auto] gap-3">
-                <p>{item.name}</p>
+              <div key={item.id} className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-3">
+                <p className="truncate">{item.name}</p>
                 <p>{item.qty}</p>
                 <p>{formatCurrencyFromCents(item.unitPrice)}</p>
               </div>

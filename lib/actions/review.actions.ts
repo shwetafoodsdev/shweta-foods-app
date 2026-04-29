@@ -121,3 +121,57 @@ export async function createReview(formData: FormData) {
     return { success: false, message: "Unable to save review." };
   }
 }
+
+const reviewIdSchema = z.string().uuid("Invalid review.");
+
+export async function deleteReview(reviewId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false as const, message: "Please sign in." };
+  }
+
+  const idParsed = reviewIdSchema.safeParse(reviewId);
+  if (!idParsed.success) {
+    return { success: false as const, message: "Invalid review." };
+  }
+
+  const review = await prisma.review.findUnique({
+    where: { id: idParsed.data },
+    select: {
+      userId: true,
+      productId: true,
+      product: { select: { slug: true } },
+    },
+  });
+
+  if (!review || review.userId !== session.user.id) {
+    return { success: false as const, message: "You can only delete your own review." };
+  }
+
+  try {
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      await tx.review.delete({ where: { id: idParsed.data } });
+
+      const aggregate = await tx.review.aggregate({
+        where: { productId: review.productId },
+        _avg: { rating: true },
+        _count: true,
+      });
+
+      await tx.product.update({
+        where: { id: review.productId },
+        data: {
+          numReviews: aggregate._count,
+          rating: aggregate._avg.rating ?? 0,
+        },
+      });
+    });
+
+    revalidatePath(`/products/${review.product.slug}`);
+    revalidatePath("/");
+
+    return { success: true as const, message: "Review deleted." };
+  } catch {
+    return { success: false as const, message: "Unable to delete review." };
+  }
+}

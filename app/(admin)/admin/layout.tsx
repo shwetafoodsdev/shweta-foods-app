@@ -28,33 +28,42 @@ export default async function AdminLayout({
   return (
     <div>
       <header className="border-b">
-        <div className="wrapper flex-between h-14">
-          <div className="flex items-center gap-6">
-            <Link href="/admin" className="flex items-center gap-2">
-              <Image src="/images/logo.svg" alt={`${APP_NAME} logo`} width={28} height={28} />
-            </Link>
-            <nav className="flex items-center gap-4 text-sm">
-              {links.map((item) => (
-                <Link key={item.href} href={item.href} className="hover:underline">
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
+        <div className="wrapper py-3 md:py-2">
+          <div className="flex items-center gap-2 md:justify-between">
+            <div className="flex min-w-0 items-center gap-4 md:gap-6">
+              <Link href="/admin" className="flex shrink-0 items-center gap-2">
+                <Image src="/images/logo.svg" alt={`${APP_NAME} logo`} width={28} height={28} />
+              </Link>
+              <nav className="hidden min-w-0 items-center gap-4 overflow-x-auto whitespace-nowrap text-sm md:flex">
+                {links.map((item) => (
+                  <Link key={item.href} href={item.href} className="hover:underline">
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+            <div className="flex min-w-0 flex-1 items-center gap-2 md:ml-auto md:flex-none">
+              <Suspense
+                fallback={
+                  <input
+                    className="h-9 min-w-0 flex-1 rounded border px-3 text-sm md:w-52 md:flex-none"
+                    placeholder="Search..."
+                    disabled
+                  />
+                }
+              >
+                <AdminSearchBar />
+              </Suspense>
+              <UserMenu session={session} />
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Suspense
-              fallback={
-                <input
-                  className="hidden md:block rounded border px-3 py-1 text-sm"
-                  placeholder="Search..."
-                  disabled
-                />
-              }
-            >
-              <AdminSearchBar />
-            </Suspense>
-            <UserMenu session={session} />
-          </div>
+          <nav className="mt-3 flex items-center gap-4 overflow-x-auto whitespace-nowrap text-sm md:hidden">
+            {links.map((item) => (
+              <Link key={item.href} href={item.href} className="hover:underline">
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </header>
       <main className="wrapper py-6">{children}</main>

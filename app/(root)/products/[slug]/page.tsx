@@ -13,6 +13,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import PageBreadcrumb from "@/components/shared/page-breadcrumb";
 import ReviewForm from "@/components/shared/product/review-form";
+import DeleteReviewButton from "@/components/shared/product/delete-review-button";
 
 type ProductReview = Awaited<ReturnType<typeof getReviewsByProductId>>[number];
 
@@ -49,15 +50,12 @@ const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
       />
       <section className="flex justify-center">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-start">
-          <div className="flex items-center justify-center h-[400px]">
-            <div className="w-full max-w-xs h-full flex items-center justify-center rounded-lg">
+          <div className="w-full">
+            <div className="w-full max-w-none rounded-lg md:max-w-xs">
               <ProductImages images={product.images} />
             </div>
           </div>
           <div className="md:py-10 md:space-y-6">
-            <p className="text-sm text-muted-foreground mb-0">
-              {product.brand} / {product.category}
-            </p>
             <h1 className="h3-bold leading-tight mt-0">{product.name}</h1>
             <div className="flex flex-col gap-1 pt-3">
               <RatingStars value={Number(product.rating)} />
@@ -110,12 +108,17 @@ const ProductDetailPage = async (props: PageProps<"/products/[slug]">) => {
         {reviews.length ? (
           <div className="space-y-4">
             {reviews.map((review: ProductReview) => (
-              <article key={review.id} className="rounded-lg border p-4">
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">{review.user.name || "Customer"}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(review.createdAt).toLocaleDateString()}
+              <article key={review.id} className="theme-surface rounded-lg border p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                    <div className="font-semibold">{review.user.name || "Customer"}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(review.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
+                  {session?.user?.id === review.userId ? (
+                    <DeleteReviewButton reviewId={review.id} />
+                  ) : null}
                 </div>
                 <div className="mt-1">
                   <RatingStars value={review.rating} />

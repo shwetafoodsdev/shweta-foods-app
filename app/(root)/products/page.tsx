@@ -44,7 +44,7 @@ const ProductsPage = async ({
     minRating != null;
 
   return (
-    <div className="mt-8 lg:grid lg:grid-cols-[220px_1fr] lg:items-start lg:gap-6">
+    <div className="w-full min-w-0 lg:grid lg:grid-cols-[220px_1fr] lg:items-start lg:gap-6">
       <section className="min-w-0 lg:col-start-2 lg:row-start-1">
         <PageBreadcrumb
           items={[
@@ -135,12 +135,13 @@ const ProductsPage = async ({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {result.data.map((product: FilteredProduct) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 cartQty={cartQtyByProductId[product.id] ?? 0}
+                compactMobile
               />
             ))}
           </div>

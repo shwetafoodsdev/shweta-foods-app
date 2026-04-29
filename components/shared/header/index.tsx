@@ -17,29 +17,30 @@ const Header = async () => {
         getCartItemCount(),
     ]);
     return (
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
-        <div className="wrapper flex min-h-20 items-center gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <Link href="/" className="group flex items-center gap-3 transition-transform duration-300 hover:scale-[1.01]">
-              <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-white to-accent/20 shadow-sm ring-1 ring-primary/10">
-                <Image
-                  src="/images/logo.svg"
-                  alt={`${APP_NAME} logo`}
-                  height={36}
-                  width={36}
-                />
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/85 pt-[env(safe-area-inset-top,0px)] backdrop-blur-xl">
+        <div className="wrapper flex min-h-[4.25rem] items-center gap-2 py-2 md:min-h-20 md:gap-4 md:py-3">
+          <Link
+            href="/"
+            className="group flex shrink-0 items-center gap-2 transition-transform duration-300 hover:scale-[1.01] sm:gap-3"
+          >
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-white to-accent/20 shadow-sm ring-1 ring-primary/10 md:size-12">
+              <Image
+                src="/images/logo.svg"
+                alt={`${APP_NAME} logo`}
+                height={36}
+                width={36}
+              />
+            </span>
+            <div className="hidden sm:block">
+              <span className="block text-2xl font-semibold tracking-tight text-foreground" style={{ fontFamily: "var(--font-heading)" }}>
+                {APP_NAME}
               </span>
-              <div className="hidden sm:block">
-                <span className="block text-2xl font-semibold tracking-tight text-foreground" style={{ fontFamily: "var(--font-heading)" }}>
-                  {APP_NAME}
-                </span>
-                <span className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
-                  Homemade premium snacks
-                </span>
-              </div>
-            </Link>
-          </div>
-          <div className="hidden min-w-0 flex-[1.4] md:block">
+              <span className="text-xs uppercase tracking-[0.28em] text-muted-foreground">
+                Homemade premium snacks
+              </span>
+            </div>
+          </Link>
+          <div className="min-w-0 flex-1 lg:flex-[1.35]">
             <SearchBar categories={categories} />
           </div>
           <nav className="hidden items-center gap-1 lg:flex">
@@ -50,7 +51,7 @@ const Header = async () => {
               Shop
             </Link>
           </nav>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <Button
               asChild
               variant="ghost"
@@ -77,9 +78,6 @@ const Header = async () => {
             </Button>
             <UserMenu session={session} />
           </div>
-        </div>
-        <div className="wrapper pb-3 md:hidden">
-          <SearchBar categories={categories} />
         </div>
       </header>
     );

@@ -71,7 +71,7 @@ const DealOfTheMonth = ({ product }: { product: DealProduct | null }) => {
         </div>
         <div className="grid max-w-sm grid-cols-3 gap-4">
           {timeLabels.map(({ key, label }) => (
-            <div key={label} className="rounded-2xl border border-border/60 bg-background/80 px-4 py-3 text-center shadow-sm">
+            <div key={label} className="theme-surface rounded-2xl border border-border/60 px-4 py-3 text-center shadow-sm">
               <div className="min-h-9 text-2xl font-bold tabular-nums text-foreground" aria-live={mounted ? "polite" : undefined}>
                 {mounted ? (
                   String(remaining[key]).padStart(2, "0")

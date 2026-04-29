@@ -9,7 +9,7 @@ export default function RootLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="wrapper flex-1 pb-14 pt-44 md:pt-24">{children}</main>
+      <main className="wrapper min-w-0 flex-1 pb-14 pt-[var(--site-header-offset)]">{children}</main>
       <Footer />
     </div>
   );
