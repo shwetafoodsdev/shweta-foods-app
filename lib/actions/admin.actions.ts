@@ -11,7 +11,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { insertProductSchema } from "@/lib/validations";
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_noStore as noStore } from "next/cache";
 
 async function requireAdmin() {
   const session = await auth();
@@ -125,14 +125,21 @@ async function saveUploadedProductImages(slug: string, files: File[], existingIm
 }
 
 export async function getAdminDashboardStats() {
+  noStore();
   await requireAdmin();
-  const [products, users, orders] = await Promise.all([
+  const [products, users, orders, orderStats] = await Promise.all([
     prisma.product.count(),
     prisma.user.count(),
     prisma.order.findMany({ orderBy: { createdAt: "desc" }, take: 6, include: { user: true } }),
+    prisma.order.aggregate({
+      where: { deliveredAt: { not: null } },
+      _sum: { totalPrice: true },
+      _count: true,
+    }),
   ]);
-  const revenue = orders.reduce((acc: number, order: { totalPrice: number }) => acc + order.totalPrice, 0);
-  return { products, users, orders, revenue };
+  const revenue = orderStats._sum.totalPrice ?? 0;
+  const salesCount = orderStats._count;
+  return { products, users, orders, revenue, salesCount };
 }
 
 export async function getAdminProducts() {

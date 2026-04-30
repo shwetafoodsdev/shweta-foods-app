@@ -1,6 +1,7 @@
 import { getAdminDashboardStats } from "@/lib/actions/admin.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
 import Link from "next/link";
+import { unstable_noStore as noStore } from "next/cache";
 
 type AdminDashboardOrder = Awaited<ReturnType<typeof getAdminDashboardStats>>["orders"][number];
 
@@ -9,6 +10,7 @@ const AdminDashboardPage = async ({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) => {
+  noStore();
   const [stats, params] = await Promise.all([getAdminDashboardStats(), searchParams]);
   const q = params.q?.trim().toLowerCase() ?? "";
   const orders = q
@@ -35,7 +37,7 @@ const AdminDashboardPage = async ({
         </div>
         <div className="rounded border p-4">
           <p className="text-sm text-muted-foreground">Sales</p>
-          <p className="text-3xl font-bold">{stats.orders.length}</p>
+          <p className="text-3xl font-bold">{stats.salesCount}</p>
         </div>
         <Link href="/admin/users" className="rounded border p-4 block">
           <p className="text-sm text-muted-foreground">Customers</p>

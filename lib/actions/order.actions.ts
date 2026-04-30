@@ -225,5 +225,7 @@ export async function markOrderDelivered(orderId: string) {
     data: { deliveredAt: new Date(), status: "shipped" },
   });
   revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/admin");
+  revalidatePath("/admin/orders");
   return { success: true };
 }
