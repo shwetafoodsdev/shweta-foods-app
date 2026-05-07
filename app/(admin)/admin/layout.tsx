@@ -32,7 +32,14 @@ export default async function AdminLayout({
           <div className="flex items-center gap-2 md:justify-between">
             <div className="flex min-w-0 items-center gap-4 md:gap-6">
               <Link href="/admin" className="flex shrink-0 items-center gap-2">
-                <Image src="/images/logo.svg" alt={`${APP_NAME} logo`} width={28} height={28} />
+                <Image
+                  src="/images/official-logo.png"
+                  alt={`${APP_NAME} logo`}
+                  width={88}
+                  height={44}
+                  className="h-8 w-16 object-contain md:h-9 md:w-20"
+                  priority
+                />
               </Link>
               <nav className="hidden min-w-0 items-center gap-4 overflow-x-auto whitespace-nowrap text-sm md:flex">
                 {links.map((item) => (

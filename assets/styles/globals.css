@@ -102,6 +102,7 @@
     transform-style: preserve-3d;
     will-change: transform;
   }
+
 }
 
 @media (min-width: 768px) {

@@ -9,11 +9,11 @@ export default function BrandedLoader() {
     >
       <div className="perspective-[900px]">
         <Image
-          src="/images/logo.svg"
+          src="/images/official-logo.png"
           alt="Shweta Foods logo"
-          width={120}
-          height={120}
-          className="animate-logo-3d drop-shadow-[0_14px_24px_rgba(0,0,0,0.2)]"
+          width={240}
+          height={135}
+          className="animate-logo-3d h-auto w-40 drop-shadow-[0_14px_24px_rgba(0,0,0,0.2)] md:w-56"
           priority
         />
       </div>

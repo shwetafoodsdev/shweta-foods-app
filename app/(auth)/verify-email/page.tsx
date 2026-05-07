@@ -26,7 +26,14 @@ const VerifyEmailPage = async ({
       <Card className="w-full">
         <CardHeader className="space-y-1 px-6 pt-4 pb-0">
           <Link href="/" className="flex justify-center">
-            <Image src="/images/logo.svg" alt={`${APP_NAME} logo`} width={40} height={40} priority />
+            <Image
+              src="/images/official-logo.png"
+              alt={`${APP_NAME} logo`}
+              width={160}
+              height={90}
+              className="h-auto w-32 object-contain"
+              priority
+            />
           </Link>
           <CardTitle className="text-center">Verify your email</CardTitle>
           <CardDescription className="text-center text-muted-foreground">

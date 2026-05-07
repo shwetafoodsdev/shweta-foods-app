@@ -9,10 +9,11 @@ const NotFoundPage = () => {
     return (
         <div className="flex flex-col items-center justify-center h-screen text-center gap-6 px-4">
             <Image
-                src="/images/logo.svg"
+                src="/images/official-logo.png"
                 alt={`${APP_NAME} logo`}
-                width={60}
-                height={60}
+                width={190}
+                height={108}
+                className="h-auto w-36 object-contain"
                 priority
             />
             <div className="p-4 w-full max-w-md rounded-2xl shadow-lg border">

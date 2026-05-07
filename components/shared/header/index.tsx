@@ -23,12 +23,14 @@ const Header = async () => {
             href="/"
             className="group flex shrink-0 items-center gap-2 transition-transform duration-300 hover:scale-[1.01] sm:gap-3"
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-white to-accent/20 shadow-sm ring-1 ring-primary/10 md:size-12">
+            <span className="flex h-10 w-24 shrink-0 items-center justify-center md:h-12 md:w-28">
               <Image
-                src="/images/logo.svg"
+                src="/images/official-logo.png"
                 alt={`${APP_NAME} logo`}
-                height={36}
-                width={36}
+                height={60}
+                width={120}
+                className="h-full w-full object-contain"
+                priority
               />
             </span>
             <div className="hidden sm:block">
