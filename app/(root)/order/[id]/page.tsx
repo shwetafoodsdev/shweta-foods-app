@@ -1,10 +1,11 @@
 import { getOrderById } from "@/lib/actions/order.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
-import type { OrderItem } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { markOrderDelivered } from "@/lib/actions/order.actions";
 import { auth } from "@/auth";
 import Link from "next/link";
+
+type OrderItemWithProductVisibility = Awaited<ReturnType<typeof getOrderById>>["orderItems"][number];
 
 const OrderDetailsPage = async ({
   params,
@@ -71,9 +72,14 @@ const OrderDetailsPage = async ({
         <div className="rounded border p-4">
           <h2 className="font-semibold mb-3">Order Items</h2>
           <div className="space-y-2">
-            {order.orderItems.map((item: OrderItem) => (
+            {order.orderItems.map((item: OrderItemWithProductVisibility) => (
               <div key={item.id} className="grid grid-cols-[1fr_auto_auto] gap-3">
-                <p>{item.name}</p>
+                <div>
+                  <p>{item.name}</p>
+                  {!item.product?.isVisiable ? (
+                    <p className="text-xs text-muted-foreground">This product is unavailable.</p>
+                  ) : null}
+                </div>
                 <p>{item.qty}</p>
                 <p>{formatCurrencyFromCents(item.unitPrice)}</p>
               </div>

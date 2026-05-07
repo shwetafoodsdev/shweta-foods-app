@@ -180,7 +180,13 @@ export async function getOrderById(orderId: string) {
       ...(session?.user.role === "admin" ? {} : { userId }),
     },
     include: {
-      orderItems: true,
+      orderItems: {
+        include: {
+          product: {
+            select: { isVisiable: true },
+          },
+        },
+      },
       user: { select: { name: true, email: true } },
     },
   });
@@ -209,7 +215,13 @@ export async function getAdminOrderById(orderId: string) {
   return prisma.order.findUnique({
     where: { id: orderId },
     include: {
-      orderItems: true,
+      orderItems: {
+        include: {
+          product: {
+            select: { isVisiable: true },
+          },
+        },
+      },
       user: { select: { name: true, email: true } },
     },
   });

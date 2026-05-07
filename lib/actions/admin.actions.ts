@@ -48,6 +48,9 @@ function getFallbackAdminProducts() {
     isDealOfDay: product.isDealOfDay ?? false,
     dealEndsAt: product.dealEndsAt ?? null,
     createdAt: new Date(),
+    _count: {
+      orderItems: 0,
+    },
   }));
 }
 
@@ -194,7 +197,14 @@ export async function getAdminDashboardStats() {
 export async function getAdminProducts() {
   await requireAdmin();
   try {
-    const products = await prisma.product.findMany({ orderBy: { createdAt: "desc" } });
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: { orderItems: true },
+        },
+      },
+    });
     return {
       products,
       isFallback: false,
@@ -328,9 +338,64 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
 
 export async function deleteAdminProduct(id: string) {
   await requireAdmin();
-  await prisma.product.delete({ where: { id } });
-  revalidatePath("/admin/products");
-  return { success: true };
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        _count: { select: { orderItems: true } },
+      },
+    });
+
+    if (!product) {
+      return { success: false, message: "Product not found." };
+    }
+
+    if (product._count.orderItems > 0) {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        await tx.cartItem.deleteMany({ where: { productId: id } });
+        await tx.product.update({
+          where: { id },
+          data: {
+            isVisiable: false,
+            stock: 0,
+            isDealOfDay: false,
+            dealEndsAt: null,
+          },
+        });
+      });
+      revalidatePath("/cart");
+      revalidatePath("/products");
+      revalidatePath("/");
+      revalidatePath("/admin");
+      revalidatePath("/admin/products");
+      return {
+        success: true,
+        message:
+          "Product was already used in orders, so it was marked unavailable and removed from carts.",
+      };
+    }
+
+    await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+      await tx.cartItem.deleteMany({ where: { productId: id } });
+      await tx.product.delete({ where: { id } });
+    });
+    revalidatePath("/admin/products");
+    revalidatePath("/cart");
+    revalidatePath("/products");
+    revalidatePath("/");
+    return { success: true, message: "Product deleted." };
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+      return {
+        success: false,
+        message:
+          "This product cannot be deleted because it is linked to existing order history.",
+      };
+    }
+    console.error("Delete product error:", error);
+    return { success: false, message: "Unable to delete product." };
+  }
 }
 
 export async function getAdminUsers() {

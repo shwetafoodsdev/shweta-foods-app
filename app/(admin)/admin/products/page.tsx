@@ -1,6 +1,7 @@
 import { deleteAdminProduct, getAdminProducts } from "@/lib/actions/admin.actions";
 import { formatCurrencyFromCents, formatDisplayId } from "@/lib/format";
 import Link from "next/link";
+import DeleteProductButton from "@/components/admin/delete-product-button";
 
 type AdminProduct = Awaited<ReturnType<typeof getAdminProducts>>["products"][number];
 
@@ -11,8 +12,9 @@ const AdminProductsPage = async ({
 }) => {
   const [{ products, isFallback }, params] = await Promise.all([getAdminProducts(), searchParams]);
   const q = params.q?.trim().toLowerCase() ?? "";
+  const visibleProducts = products.filter((product: AdminProduct) => product.isVisiable);
   const filteredProducts = q
-    ? products.filter((product: AdminProduct) =>
+    ? visibleProducts.filter((product: AdminProduct) =>
         [
           product.id,
           formatDisplayId("PRD", product.id),
@@ -22,12 +24,7 @@ const AdminProductsPage = async ({
           product.brand,
         ].some((value) => value.toLowerCase().includes(q))
       )
-    : products;
-
-  async function onDelete(formData: FormData) {
-    "use server";
-    await deleteAdminProduct(formData.get("id")?.toString() || "");
-  }
+    : visibleProducts;
 
   return (
     <div>
@@ -79,17 +76,11 @@ const AdminProductsPage = async ({
                 >
                   Edit
                 </Link>
-                <form action={onDelete}>
-                  <input type="hidden" name="id" value={product.id} />
-                  <button
-                    type="submit"
-                    disabled={isFallback}
-                    title={isFallback ? "Unavailable while sample fallback data is shown" : "Delete product"}
-                    className="rounded bg-red-600 px-2 py-1 text-white disabled:cursor-not-allowed disabled:bg-red-300"
-                  >
-                    Delete
-                  </button>
-                </form>
+                <DeleteProductButton
+                  productId={product.id}
+                  hasOrderHistory={product._count.orderItems > 0}
+                  disabled={isFallback}
+                />
               </div>
             </div>
           )) : <div className="border-t p-4 text-sm text-muted-foreground">No products match your search.</div>}
