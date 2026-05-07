@@ -4,7 +4,7 @@ import { signInFormSchema, signUpFormSchema } from "../validations";
 import { signIn, signOut } from "@/auth";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { prisma } from "@/lib/prisma";
-import { hashSync } from "bcrypt-ts-edge";
+import { compareSync, hashSync } from "bcrypt-ts-edge";
 import { createAndSendEmailVerification, verifyEmailToken } from "@/lib/email-verification";
 
 // Sign in user with credentials
@@ -22,9 +22,19 @@ export async function signInWithCredentials(
       where: { email: user.email },
       select: { id: true, password: true, emailVerified: true },
     });
-    if (!existingUser?.password) {
+
+    if (!existingUser) {
+      return { success: false, message: "User is not registered, please signup." };
+    }
+
+    if (!existingUser.password) {
       return { success: false, message: "Invalid email or password" };
     }
+
+    if (!compareSync(user.password, existingUser.password)) {
+      return { success: false, message: "Invalid email or password" };
+    }
+
     if (!existingUser.emailVerified) {
       return { success: false, message: "Please verify your email before signing in." };
     }

@@ -81,14 +81,38 @@ export async function getProductCategories() {
 
 // Get single product by slug
 export async function getProductBySlug(slug: string) {
-  if (!slug) {
+  const normalizedSlug = decodeURIComponent(slug || "").trim();
+  const canonicalSlug = normalizedSlug
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  if (!normalizedSlug) {
     return null;
   }
 
   try {
     const where: Prisma.ProductWhereInput = {
-      slug,
       ...visibleProductsFilter,
+      OR: [
+        {
+          slug: {
+            equals: normalizedSlug,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        },
+        ...(canonicalSlug && canonicalSlug !== normalizedSlug.toLowerCase()
+          ? [
+              {
+                slug: {
+                  equals: canonicalSlug,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+            ]
+          : []),
+      ],
     };
     const data = await prisma.product.findFirst({
       where,
@@ -96,7 +120,14 @@ export async function getProductBySlug(slug: string) {
     return data;
   } catch (error) { 
     if (isDatabaseInitializationError(error)) {
-      return getFallbackProducts().find((product) => product.slug === slug && product.isVisiable) ?? null;
+      return (
+        getFallbackProducts().find(
+          (product) =>
+            (product.slug.toLowerCase() === normalizedSlug.toLowerCase() ||
+              product.slug.toLowerCase() === canonicalSlug) &&
+            product.isVisiable
+        ) ?? null
+      );
     }
     throw error;
   }

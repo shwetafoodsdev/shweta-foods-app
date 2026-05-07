@@ -18,6 +18,15 @@ export function getCloudinaryManagedFolder() {
   return CLOUDINARY_MANAGED_FOLDER;
 }
 
+export function isCloudinaryConfigured() {
+  return Boolean(
+    process.env.CLOUDINARY_URL ||
+      (process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET),
+  );
+}
+
 export async function uploadProductImageToCloudinary(params: {
   bytes: Buffer;
   slug: string;

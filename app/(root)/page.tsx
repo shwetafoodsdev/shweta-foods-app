@@ -77,14 +77,16 @@ const Homepage = async () => {
             </div>
           </div>
           <div className="relative z-10">
-            <Image
-              src={dealProductData?.images[0] ?? "/images/sample-product.jpg"}
-              alt={dealProductData?.name ?? "Shweta Foods assortment"}
-              width={620}
-              height={460}
-              className="mx-auto h-[300px] w-full object-contain md:h-[360px]"
-              priority
-            />
+            <div className="overflow-hidden rounded-[1.75rem]">
+              <Image
+                src={dealProductData?.images[0] ?? "/images/sample-product.jpg"}
+                alt={dealProductData?.name ?? "Shweta Foods assortment"}
+                width={620}
+                height={460}
+                className="mx-auto h-[300px] w-full object-cover md:h-[360px]"
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>

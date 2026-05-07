@@ -6,12 +6,15 @@ import {
   deleteCloudinaryAssetByPublicId,
   getCloudinaryManagedFolder,
   getCloudinaryPublicIdFromUrl,
+  isCloudinaryConfigured,
   uploadProductImageToCloudinary,
 } from "@/lib/cloudinary";
 import { prisma } from "@/lib/prisma";
 import { insertProductSchema } from "@/lib/validations";
 import { Prisma } from "@prisma/client";
 import { revalidatePath, unstable_noStore as noStore } from "next/cache";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 async function requireAdmin() {
   const session = await auth();
@@ -63,7 +66,11 @@ function getFirstValidationMessage(error: unknown) {
 }
 
 function isManagedProductImage(imagePath: string) {
-  if (/^\/images\/[^/]+-\d+\.jpg$/i.test(imagePath)) {
+  if (/^\/images\/[^/]+-\d+\.[a-z0-9]+$/i.test(imagePath)) {
+    return true;
+  }
+
+  if (/^\/uploads\/products\/[^/]+$/i.test(imagePath)) {
     return true;
   }
 
@@ -88,6 +95,16 @@ const supportedImageTypes = new Set([
 async function removeManagedProductImages(images: string[]) {
   await Promise.all(
     images.filter(isManagedProductImage).map(async (imagePath) => {
+      if (imagePath.startsWith("/uploads/products/")) {
+        const localFilePath = join(process.cwd(), "public", imagePath.replace(/^\//, ""));
+        try {
+          await unlink(localFilePath);
+        } catch {
+          // Ignore missing files.
+        }
+        return;
+      }
+
       const publicId = getCloudinaryPublicIdFromUrl(imagePath);
       if (!publicId) {
         return;
@@ -100,10 +117,23 @@ async function removeManagedProductImages(images: string[]) {
 
 function getNextManagedImageIndex(images: string[]) {
   return images.reduce((maxIndex, imagePath) => {
-    const match = imagePath.match(/-(\d+)\.jpg$/i);
+    const match = imagePath.match(/-(\d+)\.[a-z0-9]+$/i);
     const index = match ? Number(match[1]) : 0;
     return Math.max(maxIndex, index);
   }, 0);
+}
+
+function extensionForMimeType(mimeType: string) {
+  const map: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/jpg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+    "image/avif": "avif",
+    "image/bmp": "bmp",
+  };
+  return map[mimeType] ?? "jpg";
 }
 
 async function saveUploadedProductImages(slug: string, files: File[], existingImages: string[]) {
@@ -119,6 +149,25 @@ async function saveUploadedProductImages(slug: string, files: File[], existingIm
       index: nextIndex,
     });
     savedImages.push(imageUrl);
+  }
+
+  return savedImages;
+}
+
+async function saveUploadedProductImagesLocally(slug: string, files: File[], existingImages: string[]) {
+  const savedImages: string[] = [];
+  const uploadDir = join(process.cwd(), "public", "uploads", "products");
+  await mkdir(uploadDir, { recursive: true });
+  const startingIndex = getNextManagedImageIndex(existingImages);
+  const uploadBatchId = Date.now().toString(36);
+
+  for (const [index, file] of files.entries()) {
+    const nextIndex = startingIndex + index + 1;
+    const ext = extensionForMimeType(file.type);
+    const filename = `${slug}-${uploadBatchId}-${nextIndex}.${ext}`;
+    const bytes = Buffer.from(await file.arrayBuffer());
+    await writeFile(join(uploadDir, filename), bytes);
+    savedImages.push(`/uploads/products/${filename}`);
   }
 
   return savedImages;
@@ -195,21 +244,27 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
     return { success: false, message: "Only valid image files are supported for product uploads." };
   }
 
-  const slug = formData.get("slug")?.toString().trim() ?? "";
+  const rawSlug = formData.get("slug")?.toString() ?? "";
+  const slug = rawSlug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
   const generatedImages = uploadedFiles.length
     ? uploadedFiles.map(
         (_, index) =>
           `https://res.cloudinary.com/placeholder/image/upload/${getCloudinaryManagedFolder()}/${slug}-${getNextManagedImageIndex(retainedImages) + index + 1}.jpg`,
       )
     : [];
-  const candidateImages = [...retainedImages, ...generatedImages];
+  const candidateImages = Array.from(new Set([...retainedImages, ...generatedImages]));
   const dealEndsAt = isDealOfDay
     ? new Date(Date.now() + countdownHoursValue * 60 * 60 * 1000)
     : null;
 
   const parsed = insertProductSchema.safeParse({
     name: formData.get("name"),
-    slug: formData.get("slug"),
+    slug,
     category: formData.get("category"),
     description: formData.get("description"),
     images: candidateImages,
@@ -228,9 +283,11 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
   }
 
   const uploadedImages = uploadedFiles.length
-    ? await saveUploadedProductImages(parsed.data.slug, uploadedFiles, retainedImages)
+    ? isCloudinaryConfigured()
+      ? await saveUploadedProductImages(parsed.data.slug, uploadedFiles, retainedImages)
+      : await saveUploadedProductImagesLocally(parsed.data.slug, uploadedFiles, retainedImages)
     : [];
-  const images = [...retainedImages, ...uploadedImages];
+  const images = Array.from(new Set([...retainedImages, ...uploadedImages]));
   const removedImages = (existingProduct?.images ?? []).filter((image: string) => !retainedImages.includes(image));
 
   if (parsed.data.isDealOfDay) {
