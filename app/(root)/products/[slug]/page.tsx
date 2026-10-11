@@ -1,5 +1,6 @@
 import { getProductBySlug } from "@/lib/actions/product.actions";
 import ProductImages from "@/components/shared/product/product-images";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,22 @@ import { Button } from "@/components/ui/button";
 import PageBreadcrumb from "@/components/shared/page-breadcrumb";
 import ReviewForm from "@/components/shared/product/review-form";
 import DeleteReviewButton from "@/components/shared/product/delete-review-button";
+
+export async function generateMetadata(props: PageProps<"/products/[slug]">): Promise<Metadata> {
+  const { slug } = await props.params;
+  const product = await getProductBySlug(slug);
+  if (!product) {
+    return {};
+  }
+  const title = product.seoTitle || product.name;
+  const description = product.seoDescription || product.description.slice(0, 160);
+  return {
+    title,
+    description,
+    keywords: product.seoKeywords || undefined,
+    openGraph: { title, description, images: product.images[0] ? [product.images[0]] : undefined },
+  };
+}
 
 type ProductReview = Awaited<ReturnType<typeof getReviewsByProductId>>[number];
 

@@ -42,6 +42,9 @@ model Product {
   isVisiable  Boolean  @default(true)
   isDealOfDay Boolean  @default(false)
   dealEndsAt  DateTime? @db.Timestamptz(6)
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
   cartItems   CartItem[]
   orderItems  OrderItem[]
   reviews     Review[]

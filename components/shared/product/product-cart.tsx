@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import ProductCardImages from "./product-card-images";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Product } from "@/types";
 import RatingStars from "./rating-stars";
@@ -24,15 +24,10 @@ const ProductCard = ({
         className="group block min-w-0 flex-1 no-underline text-inherit outline-none focus-visible:ring-2 focus-visible:ring-foreground/15 focus-visible:ring-offset-0"
       >
         <CardHeader className="m-0 overflow-hidden p-0">
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            width={300}
-            height={200}
-            className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-              compactMobile ? "h-[140px] sm:h-[220px]" : "h-[220px]"
-            }`}
-            loading="lazy"
+          <ProductCardImages
+            images={product.images}
+            name={product.name}
+            className={compactMobile ? "h-[140px] sm:h-[220px]" : "h-[220px]"}
           />
         </CardHeader>
         <CardContent className={`flex flex-1 flex-col ${compactMobile ? "gap-2 p-3 pb-2 sm:gap-3 sm:p-5 sm:pb-3" : "gap-3 p-5 pb-3"}`}>

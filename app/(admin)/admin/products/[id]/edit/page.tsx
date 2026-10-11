@@ -25,6 +25,9 @@ const AdminEditProductPage = async ({
     dealEndsAt: product.dealEndsAt?.toISOString() ?? null,
     description: product.description,
     banner: product.banner,
+    seoTitle: product.seoTitle,
+    seoDescription: product.seoDescription,
+    seoKeywords: product.seoKeywords,
     rating: Number(product.rating),
   };
 
