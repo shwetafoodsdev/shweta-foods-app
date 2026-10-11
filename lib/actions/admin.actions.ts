@@ -60,6 +60,22 @@ function parseImageEntries(entries: FormDataEntryValue[]) {
     .filter(Boolean);
 }
 
+// imageOrder tokens are "existing:<url>" or "new:<index into uploaded files>".
+// Anything missing from the order list keeps its default position at the end.
+function applyImageOrder(order: string[], retainedImages: string[], uploadedImages: string[]) {
+  const ordered: string[] = [];
+  for (const token of order) {
+    if (token.startsWith("existing:")) {
+      const url = token.slice("existing:".length);
+      if (retainedImages.includes(url)) ordered.push(url);
+    } else if (token.startsWith("new:")) {
+      const uploaded = uploadedImages[Number(token.slice("new:".length))];
+      if (uploaded) ordered.push(uploaded);
+    }
+  }
+  return Array.from(new Set([...ordered, ...retainedImages, ...uploadedImages]));
+}
+
 function getFirstValidationMessage(error: unknown) {
   if (typeof error === "object" && error && "issues" in error) {
     const issues = error.issues as Array<{ message?: string }>;
@@ -220,6 +236,23 @@ export async function getAdminProducts() {
   }
 }
 
+export async function getAdminProductCategories() {
+  await requireAdmin();
+  try {
+    const rows = await prisma.product.findMany({
+      distinct: ["category"],
+      select: { category: true },
+      orderBy: { category: "asc" },
+    });
+    return rows.map((row: { category: string }) => row.category);
+  } catch (error) {
+    if (isDatabaseInitializationError(error)) {
+      return Array.from(new Set(sampleData.products.map((product) => product.category)));
+    }
+    throw error;
+  }
+}
+
 export async function getAdminProductById(id: string) {
   await requireAdmin();
   return prisma.product.findUnique({ where: { id } });
@@ -286,6 +319,9 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
     isDealOfDay,
     dealEndsAt,
     banner: formData.get("banner")?.toString() || undefined,
+    seoTitle: formData.get("seoTitle")?.toString().trim() || null,
+    seoDescription: formData.get("seoDescription")?.toString().trim() || null,
+    seoKeywords: formData.get("seoKeywords")?.toString().trim() || null,
   });
 
   if (!parsed.success) {
@@ -297,7 +333,11 @@ export async function saveAdminProduct(prevState: unknown, formData: FormData) {
       ? await saveUploadedProductImages(parsed.data.slug, uploadedFiles, retainedImages)
       : await saveUploadedProductImagesLocally(parsed.data.slug, uploadedFiles, retainedImages)
     : [];
-  const images = Array.from(new Set([...retainedImages, ...uploadedImages]));
+  const images = applyImageOrder(
+    formData.getAll("imageOrder").map((entry) => entry.toString()),
+    retainedImages,
+    uploadedImages,
+  );
   const removedImages = (existingProduct?.images ?? []).filter((image: string) => !retainedImages.includes(image));
 
   if (parsed.data.isDealOfDay) {

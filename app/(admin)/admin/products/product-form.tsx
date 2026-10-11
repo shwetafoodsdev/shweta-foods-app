@@ -1,7 +1,7 @@
 "use client";
 
 import { saveAdminProduct } from "@/lib/actions/admin.actions";
-import { X } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, DragEvent, useActionState, useEffect, useMemo, useRef, useState } from "react";
 
@@ -19,15 +19,26 @@ type ProductFormData = {
   dealEndsAt?: Date | string | null;
   description?: string;
   banner?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string | null;
   rating?: number;
 };
 
-const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
+const ProductForm = ({
+  product,
+  categories = [],
+}: {
+  product?: ProductFormData | null;
+  categories?: string[];
+}) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [existingImages, setExistingImages] = useState<string[]>(product?.images ?? []);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  // Display order of every image (existing + newly selected), as preview keys.
+  const [order, setOrder] = useState<string[]>([]);
   const [dealEnabled, setDealEnabled] = useState(Boolean(product?.isDealOfDay));
   const [state, formAction, isPending] = useActionState(saveAdminProduct, null);
 
@@ -63,8 +74,24 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
       src: image,
     }));
 
-    return [...existingPreviews, ...selectedPreviews];
-  }, [existingImages, selectedFiles]);
+    const all = [...existingPreviews, ...selectedPreviews];
+    const rank = (key: string) => {
+      const position = order.indexOf(key);
+      return position === -1 ? Number.MAX_SAFE_INTEGER : position;
+    };
+    // Array.sort is stable, so images not yet in `order` keep their default sequence.
+    return all.sort((a, b) => rank(a.key) - rank(b.key));
+  }, [existingImages, selectedFiles, order]);
+
+  const moveImage = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= previewImages.length) {
+      return;
+    }
+    const keys = previewImages.map((image) => image.key);
+    [keys[index], keys[target]] = [keys[target], keys[index]];
+    setOrder(keys);
+  };
 
   useEffect(() => {
     return () => {
@@ -114,6 +141,18 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
       {existingImages.map((image) => (
         <input key={image} type="hidden" name="retainedImages" value={image} />
       ))}
+      {previewImages.map((image) =>
+        image.kind === "existing" ? (
+          <input key={image.key} type="hidden" name="imageOrder" value={`existing:${image.src}`} />
+        ) : (
+          <input
+            key={image.key}
+            type="hidden"
+            name="imageOrder"
+            value={`new:${selectedFiles.findIndex((file) => `${file.name}-${file.lastModified}` === image.key)}`}
+          />
+        ),
+      )}
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label className="text-sm font-medium">Name *</label>
@@ -125,7 +164,20 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
         </div>
         <div>
           <label className="text-sm font-medium">Category *</label>
-          <input name="category" className="mt-1 w-full rounded border px-3 py-2" defaultValue={product?.category || ""} required />
+          <input
+            name="category"
+            list="category-options"
+            className="mt-1 w-full rounded border px-3 py-2"
+            defaultValue={product?.category || ""}
+            placeholder="Pick an existing category or type a new one"
+            autoComplete="off"
+            required
+          />
+          <datalist id="category-options">
+            {categories.map((category) => (
+              <option key={category} value={category} />
+            ))}
+          </datalist>
         </div>
         <div>
           <label className="text-sm font-medium">Brand *</label>
@@ -177,7 +229,7 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
         ) : null}
         {previewImages.length ? (
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {previewImages.map((image) => (
+            {previewImages.map((image, index) => (
               <div key={image.key} className="relative overflow-hidden rounded-lg border bg-white">
                 <button
                   type="button"
@@ -194,7 +246,32 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
                   <X className="size-4" />
                 </button>
                 <img src={image.src} alt={image.label} className="h-40 w-full object-cover" />
-                <p className="truncate border-t px-3 py-2 text-xs text-muted-foreground">{image.label}</p>
+                <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
+                  <p className="min-w-0 truncate text-xs text-muted-foreground">
+                    {index + 1}. {image.label}
+                    {index === 0 ? " (cover)" : ""}
+                  </p>
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      type="button"
+                      onClick={() => moveImage(index, -1)}
+                      disabled={index === 0}
+                      className="rounded border p-1 disabled:opacity-30"
+                      aria-label={`Move ${image.label} earlier`}
+                    >
+                      <ArrowLeft className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveImage(index, 1)}
+                      disabled={index === previewImages.length - 1}
+                      className="rounded border p-1 disabled:opacity-30"
+                      aria-label={`Move ${image.label} later`}
+                    >
+                      <ArrowRight className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -265,6 +342,42 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
           />
         </div>
       </div>
+      <fieldset className="space-y-4 rounded-lg border p-4">
+        <legend className="px-1 text-sm font-semibold">SEO</legend>
+        <div>
+          <label className="text-sm font-medium">SEO Title</label>
+          <input
+            name="seoTitle"
+            maxLength={70}
+            className="mt-1 w-full rounded border px-3 py-2"
+            defaultValue={product?.seoTitle || ""}
+            placeholder="Defaults to the product name"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">Up to 70 characters.</p>
+        </div>
+        <div>
+          <label className="text-sm font-medium">SEO Description</label>
+          <textarea
+            name="seoDescription"
+            maxLength={160}
+            rows={3}
+            className="mt-1 w-full rounded border px-3 py-2"
+            defaultValue={product?.seoDescription || ""}
+            placeholder="Defaults to the product description"
+          />
+          <p className="mt-1 text-xs text-muted-foreground">Up to 160 characters.</p>
+        </div>
+        <div>
+          <label className="text-sm font-medium">SEO Keywords</label>
+          <input
+            name="seoKeywords"
+            maxLength={255}
+            className="mt-1 w-full rounded border px-3 py-2"
+            defaultValue={product?.seoKeywords || ""}
+            placeholder="comma, separated, keywords"
+          />
+        </div>
+      </fieldset>
       {state && !state.success ? <p className="text-sm text-destructive">{state.message}</p> : null}
       <button className="rounded bg-slate-900 px-5 py-2 text-white disabled:opacity-70" type="submit" disabled={isPending}>
         {product?.id ? "Save Changes" : "Create Product"}

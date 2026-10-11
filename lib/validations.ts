@@ -52,6 +52,9 @@ export const insertProductSchema = z.object({
     isDealOfDay: z.boolean(),
     dealEndsAt: z.date().nullable().optional(),
     banner: z.string().optional(),
+    seoTitle: z.string().trim().max(70, "SEO title should be 70 characters or fewer").nullable().optional(),
+    seoDescription: z.string().trim().max(160, "SEO description should be 160 characters or fewer").nullable().optional(),
+    seoKeywords: z.string().trim().max(255, "SEO keywords should be 255 characters or fewer").nullable().optional(),
 });
 
 export type InsertProductInput = z.infer<typeof insertProductSchema>;

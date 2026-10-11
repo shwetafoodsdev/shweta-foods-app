@@ -31,13 +31,13 @@ export default async function AdminLayout({
         <div className="wrapper py-3 md:py-2">
           <div className="flex items-center gap-2 md:justify-between">
             <div className="flex min-w-0 items-center gap-4 md:gap-6">
-              <Link href="/admin" className="flex shrink-0 items-center gap-2">
+              <Link href="/" aria-label="Go to storefront home" className="flex shrink-0 items-center gap-2">
                 <Image
                   src="/images/official-logo.png"
                   alt={`${APP_NAME} logo`}
-                  width={88}
-                  height={44}
-                  className="h-8 w-16 object-contain md:h-9 md:w-20"
+                  width={112}
+                  height={62}
+                  className="h-10 w-20 object-contain md:h-12 md:w-28"
                   priority
                 />
               </Link>

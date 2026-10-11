@@ -23,7 +23,7 @@ const Header = async () => {
             href="/"
             className="group flex shrink-0 items-center gap-2 transition-transform duration-300 hover:scale-[1.01] sm:gap-3"
           >
-            <span className="flex h-10 w-24 shrink-0 items-center justify-center md:h-12 md:w-28">
+            <span className="flex h-12 w-28 shrink-0 items-center justify-center md:h-16 md:w-36">
               <Image
                 src="/images/official-logo.png"
                 alt={`${APP_NAME} logo`}
