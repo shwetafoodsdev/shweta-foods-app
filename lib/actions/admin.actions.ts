@@ -236,6 +236,23 @@ export async function getAdminProducts() {
   }
 }
 
+export async function getAdminProductCategories() {
+  await requireAdmin();
+  try {
+    const rows = await prisma.product.findMany({
+      distinct: ["category"],
+      select: { category: true },
+      orderBy: { category: "asc" },
+    });
+    return rows.map((row: { category: string }) => row.category);
+  } catch (error) {
+    if (isDatabaseInitializationError(error)) {
+      return Array.from(new Set(sampleData.products.map((product) => product.category)));
+    }
+    throw error;
+  }
+}
+
 export async function getAdminProductById(id: string) {
   await requireAdmin();
   return prisma.product.findUnique({ where: { id } });

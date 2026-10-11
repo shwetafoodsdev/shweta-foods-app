@@ -25,7 +25,13 @@ type ProductFormData = {
   rating?: number;
 };
 
-const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
+const ProductForm = ({
+  product,
+  categories = [],
+}: {
+  product?: ProductFormData | null;
+  categories?: string[];
+}) => {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [existingImages, setExistingImages] = useState<string[]>(product?.images ?? []);
@@ -158,7 +164,20 @@ const ProductForm = ({ product }: { product?: ProductFormData | null }) => {
         </div>
         <div>
           <label className="text-sm font-medium">Category *</label>
-          <input name="category" className="mt-1 w-full rounded border px-3 py-2" defaultValue={product?.category || ""} required />
+          <input
+            name="category"
+            list="category-options"
+            className="mt-1 w-full rounded border px-3 py-2"
+            defaultValue={product?.category || ""}
+            placeholder="Pick an existing category or type a new one"
+            autoComplete="off"
+            required
+          />
+          <datalist id="category-options">
+            {categories.map((category) => (
+              <option key={category} value={category} />
+            ))}
+          </datalist>
         </div>
         <div>
           <label className="text-sm font-medium">Brand *</label>

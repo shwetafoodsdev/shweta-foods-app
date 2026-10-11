@@ -1,4 +1,4 @@
-import { getAdminProductById } from "@/lib/actions/admin.actions";
+import { getAdminProductById, getAdminProductCategories } from "@/lib/actions/admin.actions";
 import ProductForm from "../../product-form";
 import { notFound } from "next/navigation";
 
@@ -8,7 +8,7 @@ const AdminEditProductPage = async ({
   params: Promise<{ id: string }>;
 }) => {
   const { id } = await params;
-  const product = await getAdminProductById(id);
+  const [product, categories] = await Promise.all([getAdminProductById(id), getAdminProductCategories()]);
   if (!product) notFound();
 
   const productForForm = {
@@ -34,7 +34,7 @@ const AdminEditProductPage = async ({
   return (
     <div>
       <h1 className="h2-bold mb-4">Edit Product</h1>
-      <ProductForm product={productForForm} />
+      <ProductForm product={productForForm} categories={categories} />
     </div>
   );
 };
