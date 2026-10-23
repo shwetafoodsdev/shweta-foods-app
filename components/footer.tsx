@@ -12,6 +12,17 @@ const Footer = () => {
         <p className="text-sm text-muted-foreground">
           {currentYear} {APP_NAME}. Homemade flavours, packed fresh with care.
         </p>
+        <p className="text-xs text-muted-foreground">
+          Website by{" "}
+          <a
+            href="https://labs.picoids.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="no-underline hover:no-underline"
+          >
+            Picoids Labs
+          </a>
+        </p>
       </div>
     </footer>
   );
